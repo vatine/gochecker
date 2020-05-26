@@ -1,0 +1,69 @@
+\begin{table}[ht]
+\caption{Build target statistics}
+\label{table:build}
+\begin{tabular}{|l|r|}
+ \hline
+  Packages seen & 4396 \\
+  Packages failed to download & 0 \\
+  No build failures & 4045 (92.015469\%) \\
+ \hline
+  Mean failed build targets & 24.042735 \\
+  stddev & 86.781637 \\
+ \hline
+\end{tabular}
+\end{table}
+
+\begin{table}[ht]
+\caption{Test target statistics}
+\label{table:test}
+\begin{tabular}{|l|r|}
+ \hline
+  Packages seen & 4396 \\
+  No test failures & 2980 (67.788899\%) \\
+  No build failures, but test failures & 1161 (26.410373\%) \\
+ \hline
+  Mean failed test targets for passed builds & 2.234281 \\
+  stddev & 2.194483 \\
+ \hline
+  Mean failed test targets, all packages& 3.067090 \\
+  stddev & 6.723443 \\
+ \hline
+\end{tabular}
+\end{table}
+
+\begin{table}[ht]
+\caption{Most versions per module that  download}
+\label{table:versions}
+\begin{tabular}{|l|r|}
+\hline
+ golang.org/x/tools & 161 \\
+ golang.org/x/sys & 122 \\
+ golang.org/x/net & 77 \\
+ golang.org/x/crypto & 70 \\
+ google.golang.org/genproto & 54 \\
+ github.com/gobuffalo/genny & 43 \\
+ google.golang.org/api & 32 \\
+ github.com/gobuffalo/packr/v2 & 27 \\
+ google.golang.org/grpc & 27 \\
+ cloud.google.com/go & 25 \\
+\hline
+\end{tabular}
+\end{table}
+\begin{table}[ht]
+\caption{Most versions per module that fail to download}
+\label{table:versions}
+\begin{tabular}{|l|r|}
+\hline
+ github.com/coreos/prometheus-operator & 3 \\
+ k8s.io/client-go & 2 \\
+ github.com/containerd/containerd & 2 \\
+ github.com/portworx/sched-ops & 2 \\
+ github.com/prometheus/prometheus & 2 \\
+ k8s.io/kubernetes/staging/src/k8s.io/apimachinery & 1 \\
+ github.com/kubernetes-incubator/external-storage & 1 \\
+ k8s.io/sample-apiserver & 1 \\
+ github.com/google/flatbuffers & 1 \\
+ sourcegraph.com/sourcegraph/go-diff & 1 \\
+\hline
+\end{tabular}
+\end{table}
