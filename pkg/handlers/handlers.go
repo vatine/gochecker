@@ -1,4 +1,5 @@
 package handlers
+
 // Handlers for web endpoints
 
 import (
@@ -14,7 +15,7 @@ import (
 )
 
 type PackagePayload struct {
-	Package string `json:"package"`
+	Package string               `json:"package"`
 	Data    pkgdata.PackageStats `json:"data"`
 }
 
@@ -41,7 +42,7 @@ func HandleStatusCallback(w http.ResponseWriter, r *http.Request) {
 	}
 
 	logrus.WithFields(logrus.Fields{"package": payload.Package}).Info("Status update")
-	
+
 	pkgdata.SetPackageData(payload.Package, payload.Data)
 	logrus.WithFields(logrus.Fields{
 		"package": payload.Package,

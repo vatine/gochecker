@@ -13,22 +13,22 @@ import (
 )
 
 type accumulator struct {
-	seen float64
-	downloadFailed float64
-	buildSuccess float64
-	testSuccess float64
-	noTestTargets float64
-	allVetsPassed float64
-	buildFractions []float64
-	testFractions []float64
-	vetFractions []float64
-	buildTargetsFailed []float64
-	testTargetsFailed []float64
-	vetTargetsFailed []float64
+	seen                     float64
+	downloadFailed           float64
+	buildSuccess             float64
+	testSuccess              float64
+	noTestTargets            float64
+	allVetsPassed            float64
+	buildFractions           []float64
+	testFractions            []float64
+	vetFractions             []float64
+	buildTargetsFailed       []float64
+	testTargetsFailed        []float64
+	vetTargetsFailed         []float64
 	failedBuildTargetsFailed []float64
-	failedTestTargetsFailed []float64
-	passedBuildFailedTests []float64
-	versionCount map[string]int64
+	failedTestTargetsFailed  []float64
+	passedBuildFailedTests   []float64
+	versionCount             map[string]int64
 }
 
 type mostData struct {
@@ -41,7 +41,6 @@ type nMost struct {
 	seen int
 	data []mostData
 }
-
 
 func moduleFromPackage(pkg string) string {
 	return strings.Split(pkg, "@")[0]
@@ -95,7 +94,7 @@ func (a *accumulator) process(p pkgdata.PackageStats) {
 	if p.TestableTargets == 0 {
 		a.noTestTargets += 1.0
 	}
-	
+
 	if !p.AllBuildsPass {
 		builds := float64(p.BuildableTargets)
 		buildFraction = (builds - float64(len(p.FailedBuilds))) / builds
@@ -103,8 +102,7 @@ func (a *accumulator) process(p pkgdata.PackageStats) {
 	} else {
 		a.buildSuccess += 1.0
 	}
-	
-	
+
 	if !p.AllTestsPassed {
 		tests := float64(p.TestableTargets)
 		testFraction = (tests - failedTestCount) / tests
@@ -117,20 +115,19 @@ func (a *accumulator) process(p pkgdata.PackageStats) {
 	}
 
 	a.buildFractions = append(a.buildFractions, buildFraction)
-	a.buildTargetsFailed = append(a.buildTargetsFailed, )
+	a.buildTargetsFailed = append(a.buildTargetsFailed)
 
 	a.testFractions = append(a.testFractions, testFraction)
 	a.testTargetsFailed = append(a.testTargetsFailed, float64(len(p.FailedTests)))
 
 	passedVetCount := float64(len(p.VetPassed))
 	failedVetCount := float64(len(p.FailedVets))
-	a.vetFractions = append(a.vetFractions, passedVetCount / (passedVetCount + failedVetCount))
+	a.vetFractions = append(a.vetFractions, passedVetCount/(passedVetCount+failedVetCount))
 	if (passedVetCount > 0.0) && (failedVetCount) == 0 {
 		a.allVetsPassed += 1.0
 	}
 	a.vetTargetsFailed = append(a.vetTargetsFailed, float64(failedVetCount))
 }
-
 
 // Returns the mean and standard deviation of a []float64
 func meanAndDev(data []float64) (mean, stddev float64) {
@@ -173,7 +170,7 @@ func statsRun() (accumulator, accumulator) {
 	pkgChan := pkgdata.AllPackages()
 	rv := newAccumulator()
 	fails := newAccumulator()
-	
+
 	for data := range pkgChan {
 		if data.Stats.DownloadSucceeded {
 			rv.versionCount[moduleFromPackage(data.Name)] += 1
@@ -187,16 +184,15 @@ func statsRun() (accumulator, accumulator) {
 	return *rv, *fails
 }
 
-// Return how much frac is of base, as a percentage 
+// Return how much frac is of base, as a percentage
 func percent(base, frac float64) float64 {
-	return (frac/base) * 100.0
+	return (frac / base) * 100.0
 }
-
 
 // Return the N most frequent modules, as a []mostData
 func (a accumulator) mostFrequentModules(n int) []mostData {
 	most := newMostN(n)
-	
+
 	for pkg, count := range a.versionCount {
 		most.observe(pkg, count)
 	}
@@ -211,12 +207,12 @@ func (a accumulator) emitBuildStats() {
 	fmt.Println(`\label{table:build}`)
 	fmt.Println(`\begin{tabular}{|l|r|}`)
 	fmt.Println(` \hline`)
-	
+
 	fmt.Printf(`  Packages seen & %.0f \\`, a.seen)
 	fmt.Println()
 	fmt.Printf(`  Packages failed to download & %.0f \\`, a.downloadFailed)
 	fmt.Println()
-	
+
 	fmt.Printf(`  No build failures & %.0f (%f\%%) \\`, a.buildSuccess, percent(a.seen, a.buildSuccess))
 	fmt.Println()
 
@@ -226,7 +222,7 @@ func (a accumulator) emitBuildStats() {
 	fmt.Printf(`  No test targets & %.0f (%f\%%) \\`, a.noTestTargets, percent(a.seen, a.noTestTargets))
 	fmt.Println()
 
-	fmt.Println(` \hline`)	
+	fmt.Println(` \hline`)
 	mean, dev := meanAndDev(a.failedBuildTargetsFailed)
 	fmt.Printf(`  Mean failed build targets & %f \\`, mean)
 	fmt.Println()
@@ -239,11 +235,11 @@ func (a accumulator) emitBuildStats() {
 	fmt.Println()
 	fmt.Printf(`  stddev & %f \\`, dev)
 	fmt.Println()
-	
+
 	fmt.Println(` \hline`)
 	fmt.Println(`\end{tabular}`)
 	fmt.Println(`\end{table}`)
-	
+
 }
 
 // Outputs a LaTeX table with "just test statistics"
@@ -253,20 +249,19 @@ func (a accumulator) emitTestStats() {
 	fmt.Println(`\label{table:test}`)
 	fmt.Println(`\begin{tabular}{|l|r|}`)
 	fmt.Println(` \hline`)
-	
+
 	fmt.Printf(`  Packages seen & %.0f \\`, a.seen)
 	fmt.Println()
-	
+
 	fmt.Printf(`  No test failures & %.0f (%f\%%) \\`, a.testSuccess, percent(a.seen, a.testSuccess))
 	fmt.Println()
-	fmt.Printf(`  No test failures (with tests) & %.0f (%f\%%) \\`, a.testSuccess - a.noTestTargets, percent(a.seen - a.noTestTargets, a.testSuccess - a.noTestTargets))
+	fmt.Printf(`  No test failures (with tests) & %.0f (%f\%%) \\`, a.testSuccess-a.noTestTargets, percent(a.seen-a.noTestTargets, a.testSuccess-a.noTestTargets))
 	fmt.Println()
 	passedBuildFailedTests := float64(len(a.passedBuildFailedTests))
 	fmt.Printf(`  No build failures, but test failures & %.0f (%f\%%) \\`, passedBuildFailedTests, percent(a.seen, passedBuildFailedTests))
 	fmt.Println()
 
-	fmt.Println(` \hline`)	
-
+	fmt.Println(` \hline`)
 
 	mean, dev := meanAndDev(a.passedBuildFailedTests)
 	fmt.Printf(`  Mean failed test targets for passed builds & %f \\`, mean)
@@ -281,9 +276,9 @@ func (a accumulator) emitTestStats() {
 	fmt.Printf(`  stddev & %f \\`, dev)
 	fmt.Println()
 	fmt.Println(` \hline`)
-	
+
 	fmt.Println(`\end{tabular}`)
-	fmt.Println(`\end{table}`)	
+	fmt.Println(`\end{table}`)
 }
 
 func (a accumulator) emitVersionTable(n int, fail bool) {
@@ -309,13 +304,13 @@ func (a accumulator) emitVersionTable(n int, fail bool) {
 
 func main() {
 	var dataDir string
-	
+
 	logrus.SetLevel(logrus.WarnLevel)
 
 	flag.StringVar(&dataDir, "datadir", "/tmp/go_data", "Data directory for long-term storage.")
 
 	flag.Parse()
-	
+
 	pkgdata.SetStoragePath(dataDir)
 	pkgdata.LoadLatest()
 
@@ -329,4 +324,3 @@ func main() {
 
 	fails.emitVersionTable(10, true)
 }
-
