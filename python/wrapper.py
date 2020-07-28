@@ -111,20 +111,28 @@ def test_and_build(pkg, version):
     all_tests_pass = True
     failed_builds = []
     failed_tests = []
+    vet_passed = []
+    failed_vets = []
 
     for target in all_targets:
         if len(target.get('GoFiles', [])):
             logging.debug("  Building go target %s", target['ImportPath'])
+            buildable_targets += 1
             if go('build', target['ImportPath']):
-                buildable_targets += 1
+                pass
             else:
                 all_builds_pass = False
                 failed_builds.append(target['ImportPath'])
+            if go('vet', target['ImportPath']):
+                vet_passed.append(target['ImportPath'])
+            else:
+                failed_vets.append(target['ImportPath'])
 
         if len(target.get('TestGoFiles', [])):
             logging.debug("  Testing go target %s", target['ImportPath'])
+            testable_targets += 1
             if go('test', target['ImportPath']):
-                testable_targets += 1
+                pass
             else:
                 all_tests_pass = False
                 failed_tests.append(target['ImportPath'])
@@ -135,6 +143,8 @@ def test_and_build(pkg, version):
     output['allTestsPass'] = all_tests_pass
     output['failedBuilds'] = failed_builds
     output['failedTests'] = failed_tests
+    output['passedVets'] = vet_passed
+    output['failedVets'] = failed_vets
 
     return output
 

@@ -1,5 +1,7 @@
 module github.com/vatine/gochecker
 
+go 1.14
+
 require (
 	github.com/gogo/protobuf v1.2.0 // indirect
 	github.com/gomods/athens v0.8.1

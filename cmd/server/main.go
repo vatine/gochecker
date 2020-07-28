@@ -13,7 +13,7 @@ import (
 
 // Make sure that the package data is saved every so often, in case
 // there's an unexepcted temination. Also allows for running various
-// tabulation and checks onm the adta periodically.
+// tabulation and checks on the data periodically.
 func periodicSave(d time.Duration) {
 	t := time.NewTicker(d)
 	for _ = range t.C {
