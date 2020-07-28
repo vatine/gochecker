@@ -1,4 +1,5 @@
 package validation
+
 // A package to ensure that we can spin up the external validator
 
 import (
@@ -39,7 +40,7 @@ func startRunLoop() chan execBlob {
 
 // Runs a loop, consuming one item at a time from c, finishing (if at
 // all) when c is closed.
-func runLoop(c chan execBlob){
+func runLoop(c chan execBlob) {
 	for blob := range c {
 		logrus.WithFields(logrus.Fields{
 			"args": blob.args,
@@ -48,8 +49,7 @@ func runLoop(c chan execBlob){
 
 		err := cmd.Start()
 		if err != nil {
-			logrus.WithFields(logrus.Fields{
-			}).Error("Failed to spawn external command.")
+			logrus.WithFields(logrus.Fields{}).Error("Failed to spawn external command.")
 		} else {
 			cmd.Wait()
 			logrus.WithFields(logrus.Fields{
@@ -74,4 +74,3 @@ func (c ValidationConfiguration) Start(module, version string) error {
 	}()
 	return nil
 }
-

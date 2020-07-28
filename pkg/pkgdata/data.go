@@ -13,20 +13,20 @@ import (
 	"sync"
 	"time"
 
-	"github.com/sirupsen/logrus"	
+	"github.com/sirupsen/logrus"
 )
 
 // Various bits of data about a package/module.
 type PackageStats struct {
-	DownloadSucceeded bool `json:"downloadSucceeded"`
-	BuildableTargets int `json:"buildableTargets"`
-	AllBuildsPass    bool `json:"allBuildsPass"`
-	TestableTargets  int `json:"testableTargets"`
-	AllTestsPassed   bool `json:"allTestsPass"`
-	VetPassed        []string `json:"passedVets,omitempty"`
-	FailedBuilds     []string `json:"failedBuilds,omitempty"`
-	FailedTests      []string `json:"failedTests,omitempty"`
-	FailedVets       []string `json:"failedVets,omitempty"`
+	DownloadSucceeded bool     `json:"downloadSucceeded"`
+	BuildableTargets  int      `json:"buildableTargets"`
+	AllBuildsPass     bool     `json:"allBuildsPass"`
+	TestableTargets   int      `json:"testableTargets"`
+	AllTestsPassed    bool     `json:"allTestsPass"`
+	VetPassed         []string `json:"passedVets,omitempty"`
+	FailedBuilds      []string `json:"failedBuilds,omitempty"`
+	FailedTests       []string `json:"failedTests,omitempty"`
+	FailedVets        []string `json:"failedVets,omitempty"`
 }
 
 // A datatype suitable for iterating on the collected data
@@ -41,7 +41,6 @@ var packages map[string]*PackageStats
 var clean bool
 var cleaned []string
 
-
 func init() {
 	packages = make(map[string]*PackageStats)
 	clean = true
@@ -51,7 +50,6 @@ func init() {
 func BuildPackageName(module, version string) string {
 	return fmt.Sprintf("%s@%s", module, version)
 }
-
 
 // Set the directory where state files are kept.
 func SetStoragePath(newPath string) error {
@@ -79,7 +77,7 @@ func Save() error {
 	if clean {
 		return nil
 	}
-	
+
 	filename := fmt.Sprintf("pkgdata-%s", time.Now().Format(time.RFC3339))
 	target := filepath.Join(storagePath, filename)
 
@@ -88,19 +86,19 @@ func Save() error {
 		return nil
 	}
 	defer out.Close()
-	
+
 	b, err := json.Marshal(packages)
 	if err != nil {
 		return nil
 	}
-	
+
 	_, err = out.Write(b)
 
 	if err != nil {
 		return err
 	}
 	clean = true
-		
+
 	return err
 }
 
@@ -113,7 +111,7 @@ func Load(name string) error {
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"filename": name,
-			"error": err,
+			"error":    err,
 		}).Error("Opening file")
 		return err
 	}
@@ -132,7 +130,6 @@ func Load(name string) error {
 		return err
 	}
 
-	
 	for key, val := range intermediate {
 		EnsurePackage(key)
 		SetPackageData(key, val)
@@ -141,7 +138,7 @@ func Load(name string) error {
 	dataLock.Lock()
 	defer dataLock.Unlock()
 	clean = true
-	
+
 	logrus.WithFields(logrus.Fields{"name": name}).Info("Loading complete.")
 
 	return nil
@@ -153,12 +150,12 @@ func LoadLatest() error {
 	names, err := filepath.Glob(pattern)
 	logrus.WithFields(logrus.Fields{
 		"pattern": pattern,
-		"names": names,
+		"names":   names,
 	}).Debug("Loading latest.")
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"pattern": pattern,
-			"error": err,
+			"error":   err,
 		}).Error("Globbing for latest.")
 		return err
 	}
@@ -174,7 +171,7 @@ func LoadLatest() error {
 	}).Debug("About to load data.")
 	err = Load(name)
 
-	return err	
+	return err
 }
 
 // Check if we have seen any data for the named package.
@@ -190,7 +187,7 @@ func PackageSeen(name string) bool {
 func GetPackageData(name string) (PackageStats, bool) {
 	dataLock.Lock()
 	defer dataLock.Unlock()
-	
+
 	rv, ok := packages[name]
 
 	if ok {

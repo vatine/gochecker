@@ -43,10 +43,10 @@ func main() {
 	} else {
 		logrus.SetLevel(logrus.InfoLevel)
 	}
-	pkgdata.SetStoragePath(dataDir)	
+	pkgdata.SetStoragePath(dataDir)
 	go periodicSave(saveInterval)
 	pkgdata.LoadLatest()
-	
+
 	handlers.VC.Image = image
 	handlers.VC.EnvFile = envFile
 	handlers.VC.Endpoint = endpoint
