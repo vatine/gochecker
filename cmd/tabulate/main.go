@@ -19,6 +19,7 @@ type accumulator struct {
 	testSuccess              float64
 	noTestTargets            float64
 	allVetsPassed            float64
+	buildTargets             []float64
 	buildFractions           []float64
 	testFractions            []float64
 	vetFractions             []float64
@@ -95,6 +96,8 @@ func (a *accumulator) process(p pkgdata.PackageStats) {
 		a.noTestTargets += 1.0
 	}
 
+	a.buildTargets = append(a.buildTargets, float64(p.BuildableTargets))
+	
 	if !p.AllBuildsPass {
 		builds := float64(p.BuildableTargets)
 		buildFraction = (builds - float64(len(p.FailedBuilds))) / builds
@@ -129,13 +132,25 @@ func (a *accumulator) process(p pkgdata.PackageStats) {
 	a.vetTargetsFailed = append(a.vetTargetsFailed, float64(failedVetCount))
 }
 
-// Returns the mean and standard deviation of a []float64
 func meanAndDev(data []float64) (mean, stddev float64) {
+	return meanAndDevInner(data, false)
+}
+
+func meanAndDevNoZeroes(data []float64) (mean, stddev float64) {
+	return meanAndDevInner(data, true)	
+}
+
+// Returns the mean and standard deviation of a []float64
+func meanAndDevInner(data []float64, excludeZero bool) (mean, stddev float64) {
 	acc := 0.0
-	count := float64(len(data))
+	count := 0.0
 
 	for _, v := range data {
+		if excludeZero && v == 0.0 {
+				continue
+		}
 		acc += v
+		count += 1.0
 	}
 
 	mean = acc / count
@@ -143,16 +158,20 @@ func meanAndDev(data []float64) (mean, stddev float64) {
 	acc2 := 0.0
 
 	for _, v := range data {
+		if excludeZero && v == 0.0 {
+				continue
+		}
 		delta := (v - mean)
 		acc2 += (delta * delta)
 	}
 
-	if count <= 1.0 {
-		return mean, 0.0
-	} else {
-		stddev = math.Sqrt(acc2 / (count - 1.0))
+	switch {
+	case count == 0.0:
+		return 0.0, 0.0
+	case count == 1.0: return mean, 0.0
 	}
-
+	
+	stddev = math.Sqrt(acc2 / (count - 1.0))
 	return mean, stddev
 }
 
@@ -223,15 +242,43 @@ func (a accumulator) emitBuildStats() {
 	fmt.Println()
 
 	fmt.Println(` \hline`)
-	mean, dev := meanAndDev(a.failedBuildTargetsFailed)
-	fmt.Printf(`  Mean failed build targets & %f \\`, mean)
+	mean, dev := meanAndDev(a.buildTargets)
+	fmt.Printf(`  Mean build targets (all modules)& %f \\`, mean)
+	fmt.Println()
+	fmt.Printf(`  stddev & %f \\`, dev)
+	fmt.Println()
+
+	fmt.Println(` \hline`)
+	mean, dev = meanAndDevNoZeroes(a.buildTargets)
+	fmt.Printf(`  Mean build targets (at least one buildable)& %f \\`, mean)
+	fmt.Println()
+	fmt.Printf(`  stddev & %f \\`, dev)
+	fmt.Println()
+
+	fmt.Println(` \hline`)
+	mean, dev = meanAndDev(a.failedBuildTargetsFailed)
+	fmt.Printf(`  Mean failed build targets (all modules)& %f \\`, mean)
+	fmt.Println()
+	fmt.Printf(`  stddev & %f \\`, dev)
+	fmt.Println()
+
+	fmt.Println(` \hline`)
+	mean, dev = meanAndDevNoZeroes(a.failedBuildTargetsFailed)
+	fmt.Printf(`  Mean failed build targets (at least one failed)& %f \\`, mean)
 	fmt.Println()
 	fmt.Printf(`  stddev & %f \\`, dev)
 	fmt.Println()
 
 	fmt.Println(` \hline`)
 	mean, dev = meanAndDev(a.vetTargetsFailed)
-	fmt.Printf(`  Mean failed vet targets & %f \\`, mean)
+	fmt.Printf(`  Mean failed vet targets (all modules)& %f \\`, mean)
+	fmt.Println()
+	fmt.Printf(`  stddev & %f \\`, dev)
+	fmt.Println()
+
+	fmt.Println(` \hline`)
+	mean, dev = meanAndDevNoZeroes(a.vetTargetsFailed)
+	fmt.Printf(`  Mean failed vet targets (at least one failed)& %f \\`, mean)
 	fmt.Println()
 	fmt.Printf(`  stddev & %f \\`, dev)
 	fmt.Println()
@@ -264,7 +311,14 @@ func (a accumulator) emitTestStats() {
 	fmt.Println(` \hline`)
 
 	mean, dev := meanAndDev(a.passedBuildFailedTests)
-	fmt.Printf(`  Mean failed test targets for passed builds & %f \\`, mean)
+	fmt.Printf(`  Mean failed test targets for passed builds (all) & %f \\`, mean)
+	fmt.Println()
+	fmt.Printf(`  stddev & %f \\`, dev)
+	fmt.Println()
+	fmt.Println(` \hline`)
+
+	mean, dev = meanAndDevNoZeroes(a.passedBuildFailedTests)
+	fmt.Printf(`  Mean failed test targets for passed builds (at least one fail) & %f \\`, mean)
 	fmt.Println()
 	fmt.Printf(`  stddev & %f \\`, dev)
 	fmt.Println()
@@ -272,6 +326,13 @@ func (a accumulator) emitTestStats() {
 
 	mean, dev = meanAndDev(a.failedTestTargetsFailed)
 	fmt.Printf(`  Mean failed test targets, all packages& %f \\`, mean)
+	fmt.Println()
+	fmt.Printf(`  stddev & %f \\`, dev)
+	fmt.Println()
+	fmt.Println(` \hline`)
+
+	mean, dev = meanAndDev(a.failedTestTargetsFailed)
+	fmt.Printf(`  Mean failed test targets, packages with at least one test failure& %f \\`, mean)
 	fmt.Println()
 	fmt.Printf(`  stddev & %f \\`, dev)
 	fmt.Println()
