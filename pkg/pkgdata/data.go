@@ -23,8 +23,10 @@ type PackageStats struct {
 	AllBuildsPass    bool `json:"allBuildsPass"`
 	TestableTargets  int `json:"testableTargets"`
 	AllTestsPassed   bool `json:"allTestsPass"`
+	VetPassed        []string `json:"passedVets,omitempty"`
 	FailedBuilds     []string `json:"failedBuilds,omitempty"`
 	FailedTests      []string `json:"failedTests,omitempty"`
+	FailedVets       []string `json:"failedVets,omitempty"`
 }
 
 // A datatype suitable for iterating on the collected data
@@ -232,8 +234,10 @@ func SetPackageData(name string, data PackageStats) {
 	blob.AllBuildsPass = data.AllBuildsPass
 	blob.TestableTargets = data.TestableTargets
 	blob.AllTestsPassed = data.AllTestsPassed
+	blob.VetPassed = data.VetPassed
 	blob.FailedBuilds = data.FailedBuilds
 	blob.FailedTests = data.FailedTests
+	blob.FailedVets = data.FailedVets
 }
 
 // Returns a channel on which all packages with statistics will be

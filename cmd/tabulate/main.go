@@ -17,10 +17,14 @@ type accumulator struct {
 	downloadFailed float64
 	buildSuccess float64
 	testSuccess float64
+	noTestTargets float64
+	allVetsPassed float64
 	buildFractions []float64
 	testFractions []float64
+	vetFractions []float64
 	buildTargetsFailed []float64
 	testTargetsFailed []float64
+	vetTargetsFailed []float64
 	failedBuildTargetsFailed []float64
 	failedTestTargetsFailed []float64
 	passedBuildFailedTests []float64
@@ -88,6 +92,10 @@ func (a *accumulator) process(p pkgdata.PackageStats) {
 	failedBuildCount := float64(len(p.FailedBuilds))
 	failedTestCount := float64(len(p.FailedTests))
 
+	if p.TestableTargets == 0 {
+		a.noTestTargets += 1.0
+	}
+	
 	if !p.AllBuildsPass {
 		builds := float64(p.BuildableTargets)
 		buildFraction = (builds - float64(len(p.FailedBuilds))) / builds
@@ -99,7 +107,7 @@ func (a *accumulator) process(p pkgdata.PackageStats) {
 	
 	if !p.AllTestsPassed {
 		tests := float64(p.TestableTargets)
-		testFraction = (tests - float64(len(p.FailedTests))) / tests
+		testFraction = (tests - failedTestCount) / tests
 		a.failedTestTargetsFailed = append(a.failedTestTargetsFailed, failedTestCount)
 		if p.AllBuildsPass {
 			a.passedBuildFailedTests = append(a.passedBuildFailedTests, failedTestCount)
@@ -113,6 +121,14 @@ func (a *accumulator) process(p pkgdata.PackageStats) {
 
 	a.testFractions = append(a.testFractions, testFraction)
 	a.testTargetsFailed = append(a.testTargetsFailed, float64(len(p.FailedTests)))
+
+	passedVetCount := float64(len(p.VetPassed))
+	failedVetCount := float64(len(p.FailedVets))
+	a.vetFractions = append(a.vetFractions, passedVetCount / (passedVetCount + failedVetCount))
+	if (passedVetCount > 0.0) && (failedVetCount) == 0 {
+		a.allVetsPassed += 1.0
+	}
+	a.vetTargetsFailed = append(a.vetTargetsFailed, float64(failedVetCount))
 }
 
 
@@ -204,14 +220,26 @@ func (a accumulator) emitBuildStats() {
 	fmt.Printf(`  No build failures & %.0f (%f\%%) \\`, a.buildSuccess, percent(a.seen, a.buildSuccess))
 	fmt.Println()
 
-	fmt.Println(` \hline`)	
+	fmt.Printf(`  No vet failures & %.0f (%f\%%) \\`, a.allVetsPassed, percent(a.seen, a.allVetsPassed))
+	fmt.Println()
 
+	fmt.Printf(`  No test targets & %.0f (%f\%%) \\`, a.noTestTargets, percent(a.seen, a.noTestTargets))
+	fmt.Println()
+
+	fmt.Println(` \hline`)	
 	mean, dev := meanAndDev(a.failedBuildTargetsFailed)
 	fmt.Printf(`  Mean failed build targets & %f \\`, mean)
 	fmt.Println()
 	fmt.Printf(`  stddev & %f \\`, dev)
 	fmt.Println()
 
+	fmt.Println(` \hline`)
+	mean, dev = meanAndDev(a.vetTargetsFailed)
+	fmt.Printf(`  Mean failed vet targets & %f \\`, mean)
+	fmt.Println()
+	fmt.Printf(`  stddev & %f \\`, dev)
+	fmt.Println()
+	
 	fmt.Println(` \hline`)
 	fmt.Println(`\end{tabular}`)
 	fmt.Println(`\end{table}`)
@@ -230,6 +258,8 @@ func (a accumulator) emitTestStats() {
 	fmt.Println()
 	
 	fmt.Printf(`  No test failures & %.0f (%f\%%) \\`, a.testSuccess, percent(a.seen, a.testSuccess))
+	fmt.Println()
+	fmt.Printf(`  No test failures (with tests) & %.0f (%f\%%) \\`, a.testSuccess - a.noTestTargets, percent(a.seen - a.noTestTargets, a.testSuccess - a.noTestTargets))
 	fmt.Println()
 	passedBuildFailedTests := float64(len(a.passedBuildFailedTests))
 	fmt.Printf(`  No build failures, but test failures & %.0f (%f\%%) \\`, passedBuildFailedTests, percent(a.seen, passedBuildFailedTests))
@@ -282,7 +312,7 @@ func main() {
 	
 	logrus.SetLevel(logrus.WarnLevel)
 
-	flag.StringVar(&dataDir, "datadir", "/home/ingvar/go_data", "Data directory for long-term storage.")
+	flag.StringVar(&dataDir, "datadir", "/tmp/go_data", "Data directory for long-term storage.")
 
 	flag.Parse()
 	
