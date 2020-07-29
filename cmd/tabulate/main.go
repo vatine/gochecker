@@ -97,7 +97,7 @@ func (a *accumulator) process(p pkgdata.PackageStats) {
 	}
 
 	a.buildTargets = append(a.buildTargets, float64(p.BuildableTargets))
-	
+
 	if !p.AllBuildsPass {
 		builds := float64(p.BuildableTargets)
 		buildFraction = (builds - float64(len(p.FailedBuilds))) / builds
@@ -137,7 +137,7 @@ func meanAndDev(data []float64) (mean, stddev float64) {
 }
 
 func meanAndDevNoZeroes(data []float64) (mean, stddev float64) {
-	return meanAndDevInner(data, true)	
+	return meanAndDevInner(data, true)
 }
 
 // Returns the mean and standard deviation of a []float64
@@ -147,7 +147,7 @@ func meanAndDevInner(data []float64, excludeZero bool) (mean, stddev float64) {
 
 	for _, v := range data {
 		if excludeZero && v == 0.0 {
-				continue
+			continue
 		}
 		acc += v
 		count += 1.0
@@ -159,7 +159,7 @@ func meanAndDevInner(data []float64, excludeZero bool) (mean, stddev float64) {
 
 	for _, v := range data {
 		if excludeZero && v == 0.0 {
-				continue
+			continue
 		}
 		delta := (v - mean)
 		acc2 += (delta * delta)
@@ -168,9 +168,10 @@ func meanAndDevInner(data []float64, excludeZero bool) (mean, stddev float64) {
 	switch {
 	case count == 0.0:
 		return 0.0, 0.0
-	case count == 1.0: return mean, 0.0
+	case count == 1.0:
+		return mean, 0.0
 	}
-	
+
 	stddev = math.Sqrt(acc2 / (count - 1.0))
 	return mean, stddev
 }
@@ -306,6 +307,9 @@ func (a accumulator) emitTestStats() {
 	fmt.Println()
 	passedBuildFailedTests := float64(len(a.passedBuildFailedTests))
 	fmt.Printf(`  No build failures, but test failures & %.0f (%f\%%) \\`, passedBuildFailedTests, percent(a.seen, passedBuildFailedTests))
+	fmt.Println()
+
+	fmt.Printf(`  No tests & %.0f (%f\%%) \\`, a.noTestTargets, percent(a.seen, a.noTestTargets))
 	fmt.Println()
 
 	fmt.Println(` \hline`)
