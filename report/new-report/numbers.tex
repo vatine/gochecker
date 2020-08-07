@@ -1,0 +1,100 @@
+\begin{table}[ht]
+\caption{Build target statistics}
+\label{table:build}
+\begin{tabular}{|l|r|}
+ \hline
+  Packages processed & 5086 \\
+  Packages failed to download & 117 \\
+  No build failures & 4552 (89.500590\%) \\
+  No vet failures & 2994 (58.867479\%) \\
+  No test targets & 762 (14.982304\%) \\
+ \hline
+  Mean build targets (all modules)& 38.503146 \\
+  stddev & 126.801294 \\
+  Median build targets & 4 \\
+  75th percentile \# of build targets & 24 \\
+  90th percentile \# of build targets & 133 \\
+  95th percentile \# of build targets & 185 \\
+  99th percentile \# of build targets & 449 \\
+  Max \# of build targets & 2200 \\
+ \hline
+  Mean build targets (at least one buildable)& 39.834622 \\
+  stddev & 128.769733 \\
+ \hline
+  Mean failed build targets (all modules)& 5.367283 \\
+  stddev & 46.321543 \\
+ \hline
+  Mean failed build targets (at least one failed)& 51.119850 \\
+  stddev & 134.637700 \\
+ \hline
+  Mean failed vet targets (all modules)& 6.410932 \\
+  stddev & 46.941213 \\
+ \hline
+  Mean failed vet targets (at least one failed)& 16.964620 \\
+  stddev & 75.190439 \\
+ \hline
+\end{tabular}
+\end{table}
+
+\begin{table}[ht]
+\caption{Test target statistics}
+\label{table:test}
+\begin{tabular}{|l|r|}
+ \hline
+  Packages seen & 5086 \\
+  No test failures & 3334 (65.552497\%) \\
+  No test failures (with tests) & 2572 (59.481961\%) \\
+  No build failures, but test failures & 1319 (25.933936\%) \\
+  No tests & 762 (14.982304\%) \\
+ \hline
+  Mean failed test targets for passed builds (all) & 2.334344 \\
+  stddev & 2.345298 \\
+ \hline
+  Mean failed test targets for passed builds (at least one fail) & 2.334344 \\
+  stddev & 2.345298 \\
+ \hline
+  Mean failed test targets, all packages& 5.455479 \\
+  stddev & 14.724862 \\
+ \hline
+  Mean failed test targets, packages with at least one test failure& 5.455479 \\
+  stddev & 14.724862 \\
+ \hline
+\end{tabular}
+\end{table}
+
+\begin{table}[ht]
+\caption{Most versions per module that  download}
+\label{table:versions}
+\begin{tabular}{|l|r|}
+\hline
+ golang.org/x/tools & 217 \\
+ golang.org/x/sys & 132 \\
+ golang.org/x/net & 82 \\
+ google.golang.org/genproto & 82 \\
+ golang.org/x/crypto & 78 \\
+ github.com/gobuffalo/genny & 43 \\
+ github.com/aws/aws-sdk-go & 39 \\
+ k8s.io/apimachinery & 37 \\
+ google.golang.org/api & 36 \\
+ k8s.io/api & 33 \\
+\hline
+\end{tabular}
+\end{table}
+\begin{table}[ht]
+\caption{Most versions per module that fail to download}
+\label{table:failversions}
+\begin{tabular}{|l|r|}
+\hline
+ github.com/hashicorp/vault/sdk & 3 \\
+ knative.dev/test-infra & 3 \\
+ knative.dev/pkg & 3 \\
+ github.com/operator-framework/operator-sdk & 2 \\
+ k8s.io/apiextensions-apiserver & 2 \\
+ github.com/openshift/api & 2 \\
+ google.golang.org/cloud & 2 \\
+ github.com/portworx/sched-ops & 2 \\
+ github.com/coreos/prometheus-operator & 2 \\
+ k8s.io/client-go & 2 \\
+\hline
+\end{tabular}
+\end{table}
