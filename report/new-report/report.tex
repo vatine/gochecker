@@ -613,9 +613,9 @@ FAIL
 
 This test failure is (most probably) due to the {\tt go vet} checks
 that are now run as part of running the test suite. The v1.1.1 version
-was released before the 1.10 release of the Go tool-chain. The test
-code has, since then, been fixed, but no new release seems to have
-been made.
+was released before the 1.10 release of the Go tool-chain, when a
+subset of vet checks became test failures. The test code has, since
+then, been fixed, but no new release seems to have been made.
 
 \begin{verbatim}
 $ go test github.com/VividCortex/ewma
@@ -632,7 +632,8 @@ FAIL
 This seems like a compilation error in a transitive dependency,
 probably due to not being completely ``go modules'' all the way,
 causing version skew and non-repeatable builds. Specifically, the
-package mentioned the error does not have a {\tt go.mod} file.
+package mentioned in the error message does not have a {\tt go.mod}
+file.
 
 \begin{verbatim}
 $ go test github.com/aliyun/aliyun-oss-go-sdk/oss
@@ -642,10 +643,40 @@ FAIL	github.com/aliyun/aliyun-oss-go-sdk/oss [build failed]
 FAIL
 \end{verbatim}
 
+\subsection{github.com/armon/go-metrics@v0.3.3}
+
+These test failures I cannot explain. The codehas a go.mod file, so
+should have repetable build characteristics. However, the tests
+clearly do not expect what teh underlying library generates.
+
+\begin{verbatim}
+$ go test github.com/armon/go-metrics/datadog
+go: downloading github.com/DataDog/datadog-go v3.2.0+incompatible
+--- FAIL: TestMetricSink (0.10s)
+    dogstatsd_test.go:148: Line foo.bar:42|g does not match expected: foo.bar:42.000000|g
+--- FAIL: TestTaggableMetrics (0.20s)
+    dogstatsd_test.go:148: Line sample.thing:4|g|#tagkey:tagvalue does not match expected: sample.thing:4.000000|g|#tagkey:tagvalue
+FAIL
+FAIL	github.com/armon/go-metrics/datadog	0.317s
+FAIL
+\end{verbatim}
+
 \section{Recommendations based on this research}
 
 The conclusions in this section remain mostly unchanged from the first
 iteration of this line of investigation.
+
+\subsection{github.com/benbjohnson/clock@v1.0.0}
+
+Clear case of ``go vet introduced test failures in previously passing tests''.
+
+\begin{verbatim}
+DEBUG:root:Running go test github.com/benbjohnson/clock
+# github.com/benbjohnson/clock
+vet: /go/pkg/mod/github.com/benbjohnson/clock@v1.0.0/clock_test.go:127:6: ok declared but not used
+FAIL	github.com/benbjohnson/clock [build failed]
+FAIL
+\end{verbatim}
 
 \subsection{Modules}
 
