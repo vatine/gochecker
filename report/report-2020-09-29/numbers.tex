@@ -1,0 +1,94 @@
+\begin{table}[ht]
+\caption{Build target statistics}
+\label{table:build}
+\begin{tabular}{|l|r|}
+ \hline
+  Packages processed & 5108 \\
+  Packages failed to download & 340 \\
+  No build failures & 4598 (90.015662\%) \\
+  No vet failures & 2923 (57.223962\%) \\
+  No test targets & 728 (14.252153\%) \\
+ \hline
+  Mean build targets (all modules)& 36.844753 \\
+  stddev & 115.068648 \\
+ \hline
+  Mean build targets (at least one buildable)& 37.890678 \\
+  stddev & 116.520821 \\
+ \hline
+  Mean failed build targets (all modules)& 4.872553 \\
+  stddev & 48.460687 \\
+ \hline
+  Mean failed build targets (at least one failed)& 48.801961 \\
+  stddev & 146.337843 \\
+ \hline
+  Mean failed vet targets (all modules)& 6.012921 \\
+  stddev & 48.700459 \\
+ \hline
+  Mean failed vet targets (at least one failed)& 15.026419 \\
+  stddev & 76.113398 \\
+ \hline
+\end{tabular}
+\end{table}
+
+\begin{table}[ht]
+\caption{Test target statistics}
+\label{table:test}
+\begin{tabular}{|l|r|}
+ \hline
+  Packages seen & 5108 \\
+  No test failures & 3148 (61.628818\%) \\
+  No test failures (with tests) & 2420 (55.251142\%) \\
+  No build failures, but test failures & 1552 (30.383712\%) \\
+  No tests & 728 (14.252153\%) \\
+ \hline
+  Mean failed test targets for passed builds (all) & 2.418814 \\
+  stddev & 2.364547 \\
+ \hline
+  Mean failed test targets for passed builds (at least one fail) & 2.418814 \\
+  stddev & 2.364547 \\
+ \hline
+  Mean failed test targets, all packages& 4.728571 \\
+  stddev & 13.176107 \\
+ \hline
+  Mean failed test targets, packages with at least one test failure& 4.728571 \\
+  stddev & 13.176107 \\
+ \hline
+\end{tabular}
+\end{table}
+
+\begin{table}[ht]
+\caption{Most versions per module that  download}
+\label{table:versions}
+\begin{tabular}{|l|r|}
+\hline
+ golang.org/x/tools & 201 \\
+ golang.org/x/sys & 139 \\
+ golang.org/x/net & 88 \\
+ google.golang.org/genproto & 83 \\
+ golang.org/x/crypto & 76 \\
+ github.com/gobuffalo/genny & 43 \\
+ google.golang.org/api & 39 \\
+ k8s.io/apimachinery & 37 \\
+ cloud.google.com/go & 36 \\
+ google.golang.org/grpc & 32 \\
+\hline
+\end{tabular}
+\end{table}
+\begin{table}[ht]
+\caption{Most versions per module that fail to download}
+\label{table:failversions}
+\begin{tabular}{|l|r|}
+\hline
+ golang.org/x/tools & 22 \\
+ github.com/aws/aws-sdk-go & 8 \\
+ google.golang.org/genproto & 7 \\
+ golang.org/x/sys & 5 \\
+ k8s.io/client-go & 5 \\
+ k8s.io/apimachinery & 4 \\
+ k8s.io/api & 4 \\
+ golang.org/x/crypto & 3 \\
+ k8s.io/code-generator & 3 \\
+ github.com/coreos/prometheus-operator & 3 \\
+\hline
+\end{tabular}
+\end{table}

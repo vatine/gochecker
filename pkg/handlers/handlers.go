@@ -95,10 +95,14 @@ func HandleValidation(w http.ResponseWriter, r *http.Request) {
 
 // Make sure we can trigger a save from the outside.
 func SaveHandler(w http.ResponseWriter, r *http.Request) {
+	logrus.Info("saving data")
 	err := pkgdata.Save()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintf(w, "Eror saving, %v", err)
+		logrus.WithFields(logrus.Fields{
+			"error": err,
+		}).Error("saving")
 	}
 	fmt.Fprintln(w, "Save complete")
 }
