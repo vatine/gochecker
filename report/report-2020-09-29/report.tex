@@ -110,7 +110,7 @@ it is.
 
 \subsection{Tests}
 
-The Go tool chain has a built-in test framework (accessible by running
+The Go toolchain has a built-in test framework (accessible by running
 {\tt go test {\it target}}) and it exits with a failure if any
 specific test for that target fails. This does not give us a ``number
 of failed tests'' (multiple failing tests within a single testable
@@ -120,25 +120,25 @@ to what extent things are released (and used) with failing tests.
 This round of testing was done with Go 1.15, where a few new
 ``registers as test failure'' vet checks have been introduced. The
 testing started not long after the release, with version hold-overs
-from the Go 1.14\footnote{What happened was that the complete test was
+from the Go 1.14 round\footnote{What happened was that the complete test was
   done, and during the initial write-up Go 1.15 was released, so
   ``let's do this with 1.15'' seemed like a good idea...}, so there
 may be cases where ``not the latest seed'' was used.
 
-Of the tes failure numbers, the two that probably is most interesting
+Of the test failure numbers, the two that probably is most interesting
 to compare are the ``no test failures (with tests)'' (that is, at
 least one test target, and all tests pass), which is well over half
 (55.3\%, give or take) and the ``No build failures, but at least one
 failing test'' (30.4\%). Now, there's no further breakdown than that,
 but we can at least assume that ``build failure'' would at least
-potentially cause ``test failure'' and there's a decent marging
+potentially cause ``test failure'' and there's a decent margin
 between the two.
 
 Slighly discouraging, 14.3\% of the packages had no test targets at all.
 
 \subsection{Go vet checks}
 
-The Go tool chain has a built-in tool for reporting on possible
+The Go toolchain has a built-in tool for reporting on possible
 problems with the code that aren't wrong, per se, but have been found
 to be problematic. This is invokable as {\tt go vet {\it target}}
 and exits with a ``failure''\footnote{non-zero, in the case of unix}
@@ -174,12 +174,13 @@ go: github.com/DataDog/dd-trace-go@v1.25.0: parsing go.mod:
 
 \subsection{collectd.org@v0.5.0}
 
-This seems to be a missing go.mod file.
+This seems to be a missing go.mod file (error message reformatted slightly, to fit on page).
 
 \begin{verbatim}
 $ go list -json collectd.org
 go: finding module for package collectd.org
-can't load package: package collectd.org: module collectd.org@latest found (v0.5.0), but does not contain package collectd.org
+can't load package: package collectd.org: module collectd.org@latest found (v0.5.0),\
+ but does not contain package collectd.org
 \end{verbatim}
 
 \subsection{github.com/GoogleCloudPlatform/cloud-builders/gcs-fetcher@v0.0.0-201912031815}
@@ -202,8 +203,8 @@ This suffers from what seems like a repository name change.
 
 \begin{verbatim}
 go: github.com/codegangsta/cli@v1.22.4: parsing go.mod:
-	module declares its path as: github.com/urfave/cli
-	        but was required as: github.com/codegangsta/cli
+        module declares its path as: github.com/urfave/cli
+                but was required as: github.com/codegangsta/cli
 \end{verbatim}
 
 \subsection{github.com/coreos/bbolt@v1.3.5}
@@ -214,28 +215,32 @@ happened before the introduction of the go.mod file.
 
 \begin{verbatim}
 go: github.com/coreos/bbolt@v1.3.5: parsing go.mod:
-	module declares its path as: go.etcd.io/bbolt
-	        but was required as: github.com/coreos/bbolt
+        module declares its path as: go.etcd.io/bbolt
+                but was required as: github.com/coreos/bbolt
 \end{verbatim}
 
 \subsection{github.com/coreos/prometheus-operator@v0.31.1}
 
 This is an interesting failure. It is not the module that fails
 directly. It seems as if a transitive dependency stops it from
-downloading before it gets as far as being introspectable.
+downloading before it gets as far as being introspectable (error message reformatted slightly to fit on page).
 
 \begin{verbatim}
 go: github.com/coreos/prometheus-operator@v0.31.1 requires
-	github.com/prometheus/prometheus@v2.9.2+incompatible: reading http://192.168.1.2:3000/github.com/prometheus/prometheus/@v/v2.9.2+incompatible.mod: 404 Not Found
+    github.com/prometheus/prometheus@v2.9.2+incompatible: reading\
+    http://192.168.1.2:3000/github.com/prometheus/prometheus/@v/v2.9.2+incompatible.mod:\
+    404 Not Found
 \end{verbatim}
 
 \subsection{github.com/coreos/prometheus-operator@v0.38.1-0.20200424145508-7e176fda06cc}
 
-This one also fails in a similar one to the previous one, but another module/version is what seems to be to blame for this one:
+This one also fails in a similar one to the previous one, but another module/version is what seems to be to blame for this one (error message reformatted slightly to fit on page):
 
 \begin{verbatim}
 go: github.com/coreos/prometheus-operator@v0.38.1-0.20200424145508-7e176fda06cc requires
-	k8s.io/client-go@v12.0.0+incompatible: reading http://192.168.1.2:3000/k8s.io/client-go/@v/v12.0.0+incompatible.mod: 404 Not Found
+        k8s.io/client-go@v12.0.0+incompatible: \
+        reading http://192.168.1.2:3000/k8s.io/client-go/@v/v12.0.0+incompatible.mod:\
+         404 Not Found
 \end{verbatim}
 
 \subsection{github.com/golang/lint@v0.0.0-20200302205851-738671d3881b}
@@ -248,8 +253,8 @@ this somehow just snuck in).
 
 \begin{verbatim}
 go: github.com/golang/lint@v0.0.0-20200302205851-738671d3881b: parsing go.mod:
-	module declares its path as: golang.org/x/lint
-	        but was required as: github.com/golang/lint
+        module declares its path as: golang.org/x/lint
+                but was required as: github.com/golang/lint
 \end{verbatim}
 
 \section{Investigation of (some) build errors}
@@ -296,7 +301,7 @@ runtime.main_main·f: function main is undeclared in the main package
 Note that these observations also hold for v1.0.2, for (probably) obvious reasons.
 
 This module has an examples sub-directory, with example code that does
-not compile. This is (normally) not an issue, but the Go tool chain
+not compile. This is (normally) not an issue, but the Go toolchain
 picks it up as ``contains Go code'' which could cause automated
 introspection to try to build it.
 
@@ -315,32 +320,45 @@ module.
 
 \subsection{helm.sh/helm/v3@v3.2.4}
 
-This module definitely has a go.mod file, so it is not obvious why we're seeing the error we do. However, there is an explicit replace line in the go.mod for github.com/Azure/go-autorest, trying to force the version of that module to v13.3.2+incompatible. 
+This module definitely has a go.mod file, so it is not obvious why we're seeing the error we do. However, there is an explicit replace line in the go.mod for github.com/Azure/go-autorest, trying to force the version of that module to v13.3.2+incompatible (error message reformatted slightly to fit on page). 
 
 \subsubsection{helm.sh/helm/v3/cmd/helm}
 
 \begin{verbatim}
 DEBUG:root:Running go build helm.sh/helm/v3/cmd/helm
-/go/pkg/mod/k8s.io/client-go@v0.18.0/plugin/pkg/client/auth/azure/azure.go:28:2: ambiguous import: found package github.com/Azure/go-autorest/autorest in multiple modules:
-	github.com/Azure/go-autorest v10.8.1+incompatible (/go/pkg/mod/github.com/!azure/go-autorest@v10.8.1+incompatible/autorest)
-	github.com/Azure/go-autorest/autorest v0.9.0 (/go/pkg/mod/github.com/!azure/go-autorest/autorest@v0.9.0)
-/go/pkg/mod/k8s.io/client-go@v0.18.0/plugin/pkg/client/auth/azure/azure.go:29:2: ambiguous import: found package github.com/Azure/go-autorest/autorest/adal in multiple modules:
-	github.com/Azure/go-autorest v10.8.1+incompatible (/go/pkg/mod/github.com/!azure/go-autorest@v10.8.1+incompatible/autorest/adal)
-	github.com/Azure/go-autorest/autorest/adal v0.5.0 (/go/pkg/mod/github.com/!azure/go-autorest/autorest/adal@v0.5.0)
-/go/pkg/mod/k8s.io/client-go@v0.18.0/plugin/pkg/client/auth/azure/azure.go:30:2: ambiguous import: found package github.com/Azure/go-autorest/autorest/azure in multiple modules:
-	github.com/Azure/go-autorest v10.8.1+incompatible (/go/pkg/mod/github.com/!azure/go-autorest@v10.8.1+incompatible/autorest/azure)
-	github.com/Azure/go-autorest/autorest v0.9.0 (/go/pkg/mod/github.com/!azure/go-autorest/autorest@v0.9.0/azure)
+/go/pkg/mod/k8s.io/client-go@v0.18.0/plugin/pkg/client/auth/azure/azure.go:28:2: \
+    ambiguous import: found package github.com/Azure/go-autorest/autorest\
+     in multiple modules:
+        github.com/Azure/go-autorest v10.8.1+incompatible\
+         (/go/pkg/mod/github.com/!azure/go-autorest@v10.8.1+incompatible/autorest)
+        github.com/Azure/go-autorest/autorest v0.9.0\
+         (/go/pkg/mod/github.com/!azure/go-autorest/autorest@v0.9.0)
+/go/pkg/mod/k8s.io/client-go@v0.18.0/plugin/pkg/client/auth/azure/azure.go:29:2:\
+    ambiguous import: found package github.com/Azure/go-autorest/autorest/adal\
+     in multiple modules:
+        github.com/Azure/go-autorest v10.8.1+incompatible\
+         (/go/pkg/mod/github.com/!azure/go-autorest@v10.8.1+incompatible/autorest/adal)
+        github.com/Azure/go-autorest/autorest/adal v0.5.0\
+         (/go/pkg/mod/github.com/!azure/go-autorest/autorest/adal@v0.5.0)
+/go/pkg/mod/k8s.io/client-go@v0.18.0/plugin/pkg/client/auth/azure/azure.go:30:2:\
+     ambiguous import: found package github.com/Azure/go-autorest/autorest/azure\
+     in multiple modules:
+        github.com/Azure/go-autorest v10.8.1+incompatible\
+         (/go/pkg/mod/github.com/!azure/go-autorest@v10.8.1+incompatible/autorest/azure)
+        github.com/Azure/go-autorest/autorest v0.9.0\
+         (/go/pkg/mod/github.com/!azure/go-autorest/autorest@v0.9.0/azure)
 DEBUG:root:    Build of helm.sh/helm/v3/cmd/helm failed
 \end{verbatim}
 
 \subsection{github.com/Julusian/godocdown@v0.0.0-20170816220326-6d19f8ff2df8}
 
-This module has six build targets, of which one fails.
+This module has six build targets, of which one fails (error message reformatted slightly to mostly fit on page).
 
 \begin{verbatim}
 DEBUG:root:  Building go target github.com/Julusian/godocdown
 DEBUG:root:Running go build github.com/Julusian/godocdown
-/go/pkg/mod/github.com/!julusian/godocdown@v0.0.0-20170816220326-6d19f8ff2df8/godocdown.go:14:2: import "github.com/robertkrimen/godocdown/godocdown" is a program, not an importable package
+/go/pkg/mod/github.com/!julusian/godocdown@v0.0.0-20170816220326-6d19f8ff2df8/godocdown.go:14:2:\
+ import "github.com/robertkrimen/godocdown/godocdown" is a program, not an importable package
 DEBUG:root:    Build of github.com/Julusian/godocdown failed
 \end{verbatim}
 
@@ -351,39 +369,42 @@ This module has two build targets. One works fine, the other has one
 type error. Notably, this module has no unit tests, so even an
 automated ``run all testable things'' would not have caught this. The
 source repository is archived, so it is not really sensible trying to
-repair this defect.
+repair this defect (error message reformatted slightly to fit on page).
 
 \subsubsection{mvdan.cc/lint@v0.0.0-20170908181259-adc824a0674b}
 \begin{verbatim}
 DEBUG:root:  Building go target mvdan.cc/lint/cmd/metalint
 DEBUG:root:Running go build mvdan.cc/lint/cmd/metalint
 # mvdan.cc/lint/cmd/metalint
-/go/pkg/mod/mvdan.cc/lint@v0.0.0-20170908181259-adc824a0674b/cmd/metalint/main.go:38:14: cannot use &"mvdan.cc/unparam/check".Checker literal (type *"mvdan.cc/unparam/check".Checker) as type lint.Checker in field value:
-	*"mvdan.cc/unparam/check".Checker does not implement lint.Checker (wrong type for Check method)
-		have Check() ([]"mvdan.cc/unparam/check".Issue, error)
-		want Check() ([]lint.Issue, error)
+/go/pkg/mod/mvdan.cc/lint@v0.0.0-20170908181259-adc824a0674b/cmd/metalint/main.go:38:14:\
+     cannot use &"mvdan.cc/unparam/check".Checker literal (type\
+      *"mvdan.cc/unparam/check".Checker) as type lint.Checker in field value:
+        *"mvdan.cc/unparam/check".Checker does not implement lint.Checker (wrong type\
+          for Check method)
+                have Check() ([]"mvdan.cc/unparam/check".Issue, error)
+                want Check() ([]lint.Issue, error)
 DEBUG:root:    Build of mvdan.cc/lint/cmd/metalint failed
 \end{verbatim}
 
 \subsection{sigs.k8s.io/sig-storage-lib-external-provisioner@v4.1.0+incompatible}
 
 This module (at this version) has eight buildable targets. Four of
-these fail build, and only one is an obvious example file (excluded from more detailed investigation). They are seem to be from the same root cause, so only the first encountered will be examined in detail.
+these fail build, and only one is an obvious example file (excluded
+from more detailed investigation). They seem to be from the same root
+cause, so only the first encountered will be examined in detail.
 
 \subsubsection{sigs.k8s.io/sig-storage-lib-external-provisioner/controller}
 
 This seems to stem from a dependency that has changed over time. The
 repository does not have a go.mod file, making builds repeatable over
-time quite difficult.
+time quite difficult (error message reformatted slightly to fit on page).
 
 \begin{verbatim}
-DEBUG:root:  Building go target sigs.k8s.io/sig-storage-lib-external-provisioner/controller
-DEBUG:root:Running go build sigs.k8s.io/sig-storage-lib-external-provisioner/controller
 # k8s.io/client-go/rest
-/go/pkg/mod/k8s.io/client-go@v11.0.0+incompatible/rest/request.go:598:31: not enough arguments in call to watch.NewStreamWatcher
-	have (*versioned.Decoder)
-	want (watch.Decoder, watch.Reporter)
-DEBUG:root:    Build of sigs.k8s.io/sig-storage-lib-external-provisioner/controller failed
+/go/pkg/mod/k8s.io/client-go@v11.0.0+incompatible/rest/request.go:598:31:\
+     not enough arguments in call to watch.NewStreamWatcher
+        have (*versioned.Decoder)
+        want (watch.Decoder, watch.Reporter)
 \end{verbatim}
 
 
@@ -391,9 +412,24 @@ DEBUG:root:    Build of sigs.k8s.io/sig-storage-lib-external-provisioner/control
 
 As a general comment, it is a bit surprising that tagged releases have
 test errors at all, indicating that there's improvements to make
-around release processes. In some cases, this is because the tooling
+around release processes.
+
+In some cases, this is because the tooling
 has changed what constitutes a ``passing'' test (over time, some ``go
-vet'' warnings have become errors when they occur during a run of {\tt go test}).
+vet'' warnings have become errors when they occur during a run of {\tt
+  go test}) and the CI pipeline is running with ``not the most recent
+release'', a situation that is totally understandable.
+
+There's also the case of a release
+that was made before the most current, which for obvious reasons will
+not have had a CI run against a version released after
+itself\footnote{But, if you can provide a CI system that will reliably
+  test against compiler versions released in the future from the time
+  the test is run, the author is interested in testing them...}
+
+For practical reasons, the testing has not been re-run with prior
+versions of the Go toolchain to find where things may have started
+acting up, even in the manual investigations that follow.
 
 We will now look closer at a few packages. I have explicitly excluded
 packages that have build failures from closer inspection, as the test
@@ -407,15 +443,17 @@ warnings are, until it is no longer fun to dig anymore.
 
 \subsection{github.com/hawkular/hawkular-client-go@v0.6.1}
 
-Quite a few of the tests fail within the test environment, as the test suite seems to expect that connecting to http://127.0.0.1:8080/ is non-problematic. An example test error from one test below:
+Quite a few of the tests fail within the test environment, as the test suite seems to expect that connecting to http://127.0.0.1:8080/ is non-problematic. An example test error from one test below (error message reformatted slightly to fit on page):
 
 \begin{verbatim}
 --- FAIL: TestEscapingDatapoints (0.00s)
     client_test.go:512: 
-        	Error Trace:	client_test.go:512
-        	Error:      	Received unexpected error:
-        	            	Post "http:/hawkular/metrics/counters/raw": dial tcp 127.0.0.1:8080: connect: connection refused
-        	Test:       	TestEscapingDatapoints
+                Error Trace:	client_test.go:512
+                Error:      	Received unexpected error:
+                            	Post "http:/hawkular/metrics/counters/raw":\
+                                      dial tcp 127.0.0.1:8080:\
+                                      connect: connection refused
+                Test:       	TestEscapingDatapoints
 \end{verbatim}
 
 \subsection{cloud.google.com/go/spanner@v1.5.1}
@@ -424,14 +462,16 @@ This is a test suite that requires credentials to be available in the
 test environment. However, this is a problem that's been fixed in
 v1.7.0\footnote{The data collection has picked up v1.5.1, v1.7.0, and
   v1.8.0 and all tests pass for the two latter, it is possible this
-  test was fixed in a version between v1.5.1 and v1.7.0}
+  test was fixed in a version between v1.5.1 and v1.7.0} (error message reformatted slightly to fit on page).
 
 \begin{verbatim}
 $ go test cloud.google.com/go/spanner
 2020/08/07 07:15:29 Integration tests skipped: GCLOUD_TESTS_GOLANG_PROJECT_ID is missing
 --- FAIL: TestClient_WithGRPCConnectionPoolAndNumChannels_Misconfigured (0.05s)
     client_test.go:1752: Error mismatch
-        Got: google: could not find default credentials. See https://developers.google.com/accounts/docs/application-default-credentials for more information.
+        Got: google: could not find default credentials. See \
+             https://developers.google.com/accounts/docs/application-default-credentials \
+             for more information.
         Want: An instance of a Spanner error
 FAIL
 FAIL	cloud.google.com/go/spanner	3.992s
@@ -447,7 +487,7 @@ module fail this test target\footnote{v1.0.0, and v1.3.0 pass, any
 of things, ``test requires credentials'' is pretty minor, even if it
 may make automated testing harder\footnote{If nothing else, it would
   require anyone wanting to run the test to generate suitable test
-  credentials.}
+  credentials.} (error message reformatted slightly to mostly fit on page).
 
 \begin{verbatim}
 $ go test cloud.google.com/go/storage
@@ -455,12 +495,16 @@ go: downloading github.com/google/go-cmp v0.4.1
 go: downloading github.com/google/martian v2.1.0+incompatible
 2020/08/07 07:21:54 No 'Application Default Credentials' found.
 --- FAIL: TestCallBuilders (0.00s)
-    bucket_test.go:434: google: could not find default credentials. See https://developers.google.com/accounts/docs/application-default-credentials for more information.
+    bucket_test.go:434: google: could not find default credentials. See \
+        https://developers.google.com/accounts/docs/application-default-credentials \
+        for more information.
 2020/08/07 07:21:54 No 'Application Default Credentials' found.
 [32 identical lines deleted ]
 2020/08/07 07:21:56 No 'Application Default Credentials' found.
 --- FAIL: TestWithEndpoint (0.00s)
-    storage_test.go:1228: error creating client: dialing: google: could not find default credentials. See https://developers.google.com/accounts/docs/application-default-credentials for more information.
+    storage_test.go:1228: error creating client: dialing: google: could not find default \
+        credentials. See https://developers.google.com/accounts/docs/application-default-credentials \
+        for more information.
 2020/08/07 07:22:28 No 'Application Default Credentials' found.
 2020/08/07 07:22:28 No 'Application Default Credentials' found.
 2020/08/07 07:22:28 No 'Application Default Credentials' found.
@@ -473,8 +517,7 @@ FAIL
 
 This one is slightly interesting, from the perspective that it really
 should have been caught before release, unless this is one of those
-things that stem from minor changes in the Go compiler (this is
-entirely possible).
+things that stem from minor changes in the Go compiler\footnote{GitHub user jgianuzzi has comfirmed that this is a minor change in error string formatting in the net/url package landing in Go 1.14}.
 
 \begin{verbatim}
 $ go test github.com/IBM/keyprotect-go-client
@@ -524,9 +567,12 @@ then, been fixed, but no new release seems to have been made.
 \begin{verbatim}
 $ go test github.com/VividCortex/ewma
 # github.com/VividCortex/ewma
-../pkg/mod/github.com/!vivid!cortex/ewma@v1.1.1/ewma_test.go:39:3: Errorf format %d has arg e.Value() of wrong type float64
-../pkg/mod/github.com/!vivid!cortex/ewma@v1.1.1/ewma_test.go:53:3: Errorf format %d has arg e.Value() of wrong type float64
-../pkg/mod/github.com/!vivid!cortex/ewma@v1.1.1/ewma_test.go:83:3: Errorf format %d has arg e.Value() of wrong type float64
+../pkg/mod/github.com/!vivid!cortex/ewma@v1.1.1/ewma_test.go:39:3: \
+    Errorf format %d has arg e.Value() of wrong type float64
+../pkg/mod/github.com/!vivid!cortex/ewma@v1.1.1/ewma_test.go:53:3: \
+    Errorf format %d has arg e.Value() of wrong type float64
+../pkg/mod/github.com/!vivid!cortex/ewma@v1.1.1/ewma_test.go:83:3: \
+    Errorf format %d has arg e.Value() of wrong type float64
 FAIL	github.com/VividCortex/ewma [build failed]
 FAIL
 \end{verbatim}
@@ -534,7 +580,7 @@ FAIL
 \subsection{github.com/aliyun/aliyun-oss-go-sdk@v1.9.8}
 
 This seems like a compilation error in a transitive dependency,
-probably due to not being completely ``go modules'' all the way,
+probably due to not being ``go modules'' all the way,
 causing version skew and non-repeatable builds. Specifically, the
 package mentioned in the error message does not have a {\tt go.mod}
 file.
@@ -542,7 +588,8 @@ file.
 \begin{verbatim}
 $ go test github.com/aliyun/aliyun-oss-go-sdk/oss
 # github.com/baiyubin/aliyun-sts-go-sdk/sts
-../pkg/mod/github.com/baiyubin/aliyun-sts-go-sdk@v0.0.0-20180326062324-cfa1a18b161f/sts/sts.go:109:12: assignment mismatch: 2 variables but uuid.NewV4 returns 1 values
+../pkg/mod/github.com/baiyubin/aliyun-sts-go-sdk@v0.0.0-20180326062324-cfa1a18b161f/sts/sts.go:109:12:\
+    assignment mismatch: 2 variables but uuid.NewV4 returns 1 values
 FAIL	github.com/aliyun/aliyun-oss-go-sdk/oss [build failed]
 FAIL
 \end{verbatim}
@@ -559,7 +606,8 @@ go: downloading github.com/DataDog/datadog-go v3.2.0+incompatible
 --- FAIL: TestMetricSink (0.10s)
     dogstatsd_test.go:148: Line foo.bar:42|g does not match expected: foo.bar:42.000000|g
 --- FAIL: TestTaggableMetrics (0.20s)
-    dogstatsd_test.go:148: Line sample.thing:4|g|#tagkey:tagvalue does not match expected: sample.thing:4.000000|g|#tagkey:tagvalue
+    dogstatsd_test.go:148: Line sample.thing:4|g|#tagkey:tagvalue does not match \
+        expected: sample.thing:4.000000|g|#tagkey:tagvalue
 FAIL
 FAIL	github.com/armon/go-metrics/datadog	0.317s
 FAIL
@@ -567,12 +615,13 @@ FAIL
 
 \subsection{github.com/benbjohnson/clock@v1.0.0}
 
-Clear case of ``go vet introduced test failures in previously passing tests''.
+Clear case of ``go vet'' test failure.
 
 \begin{verbatim}
 DEBUG:root:Running go test github.com/benbjohnson/clock
 # github.com/benbjohnson/clock
-vet: /go/pkg/mod/github.com/benbjohnson/clock@v1.0.0/clock_test.go:127:6: ok declared but not used
+vet: /go/pkg/mod/github.com/benbjohnson/clock@v1.0.0/clock_test.go:127:6: \
+    ok declared but not used
 FAIL	github.com/benbjohnson/clock [build failed]
 FAIL
 \end{verbatim}
@@ -627,6 +676,12 @@ back to the project.
 
 It is strongly recommended to not cut a release if there are any
 failing unit tests.
+
+It may also be useful having periodic (daily? weekly? monthly?) builds
+running wit the latest toolchain, even if that's not the primary
+concern while developing. Sooner or later, your library will end up in
+a newer toolchain. And while the Go backwards compatibility guarantees
+are prety good, this report shows that sometimes things change subtly.
 
 \section{Seed packages}
 
