@@ -21,6 +21,7 @@ type accumulator struct {
 	allVetsPassed            float64
 	buildTargets             []float64
 	buildFractions           []float64
+	testTargets              []float64
 	testFractions            []float64
 	vetFractions             []float64
 	buildTargetsFailed       []float64
@@ -85,6 +86,7 @@ func (a *accumulator) process(p pkgdata.PackageStats) {
 
 	if !p.DownloadSucceeded {
 		a.downloadFailed += 1.0
+		return
 	}
 
 	buildFraction := 1.0
@@ -97,6 +99,7 @@ func (a *accumulator) process(p pkgdata.PackageStats) {
 	}
 
 	a.buildTargets = append(a.buildTargets, float64(p.BuildableTargets))
+	a.testTargets = append(a.buildTargets, float64(p.TestableTargets))
 
 	if !p.AllBuildsPass {
 		builds := float64(p.BuildableTargets)
@@ -104,6 +107,7 @@ func (a *accumulator) process(p pkgdata.PackageStats) {
 		a.failedBuildTargetsFailed = append(a.failedBuildTargetsFailed, failedBuildCount)
 	} else {
 		a.buildSuccess += 1.0
+		a.failedBuildTargetsFailed = append(a.failedBuildTargetsFailed, 0.0)
 	}
 
 	if !p.AllTestsPassed {
@@ -196,6 +200,7 @@ func statsRun() (accumulator, accumulator) {
 			rv.versionCount[moduleFromPackage(data.Name)] += 1
 			rv.process(data.Stats)
 		} else {
+			rv.downloadFailed += 1.0
 			fails.versionCount[moduleFromPackage(data.Name)] += 1
 			fails.process(data.Stats)
 		}
@@ -207,6 +212,23 @@ func statsRun() (accumulator, accumulator) {
 // Return how much frac is of base, as a percentage
 func percent(base, frac float64) float64 {
 	return (frac / base) * 100.0
+}
+
+// Return median, 75th, 90tyhm 95th percentiles of incoming data
+func percentiles(data []float64) (median, pct75, pct90, pct95, pct99, max float64) {
+	count := len(data)
+
+	tmp := make([]float64, count)
+	copy(tmp, data)
+	sort.Float64s(tmp)
+
+	medianIx := count / 2
+	pct75Ix := (75 * count) / 100
+	pct90Ix := (90 * count) / 100
+	pct95Ix := (95 * count) / 100
+	pct99Ix := (99 * count) / 100
+
+	return tmp[medianIx], tmp[pct75Ix], tmp[pct90Ix], tmp[pct95Ix], tmp[pct99Ix], tmp[count-1]
 }
 
 // Return the N most frequent modules, as a []mostData
@@ -228,7 +250,7 @@ func (a accumulator) emitBuildStats() {
 	fmt.Println(`\begin{tabular}{|l|r|}`)
 	fmt.Println(` \hline`)
 
-	fmt.Printf(`  Packages seen & %.0f \\`, a.seen)
+	fmt.Printf(`  Packages processed & %.0f \\`, a.seen)
 	fmt.Println()
 	fmt.Printf(`  Packages failed to download & %.0f \\`, a.downloadFailed)
 	fmt.Println()
@@ -244,9 +266,22 @@ func (a accumulator) emitBuildStats() {
 
 	fmt.Println(` \hline`)
 	mean, dev := meanAndDev(a.buildTargets)
+	median, pct75, pct90, pct95, pct99, pct100 := percentiles(a.buildTargets)
 	fmt.Printf(`  Mean build targets (all modules)& %f \\`, mean)
 	fmt.Println()
 	fmt.Printf(`  stddev & %f \\`, dev)
+	fmt.Println()
+	fmt.Printf(`  Median build targets & %.0f \\`, median)
+	fmt.Println()
+	fmt.Printf(`  75th percentile \# of build targets & %.0f \\`, pct75)
+	fmt.Println()
+	fmt.Printf(`  90th percentile \# of build targets & %.0f \\`, pct90)
+	fmt.Println()
+	fmt.Printf(`  95th percentile \# of build targets & %.0f \\`, pct95)
+	fmt.Println()
+	fmt.Printf(`  99th percentile \# of build targets & %.0f \\`, pct99)
+	fmt.Println()
+	fmt.Printf(`  Max \# of build targets & %.0f \\`, pct100)
 	fmt.Println()
 
 	fmt.Println(` \hline`)
@@ -335,7 +370,7 @@ func (a accumulator) emitTestStats() {
 	fmt.Println()
 	fmt.Println(` \hline`)
 
-	mean, dev = meanAndDev(a.failedTestTargetsFailed)
+	mean, dev = meanAndDevNoZeroes(a.failedTestTargetsFailed)
 	fmt.Printf(`  Mean failed test targets, packages with at least one test failure& %f \\`, mean)
 	fmt.Println()
 	fmt.Printf(`  stddev & %f \\`, dev)
@@ -349,13 +384,16 @@ func (a accumulator) emitTestStats() {
 func (a accumulator) emitVersionTable(n int, fail bool) {
 	most := a.mostFrequentModules(n)
 	failMsg := ""
+	label := "table:versions"
 	if fail {
 		failMsg = "fail to"
+		label = "table:failversions"
 	}
 	fmt.Println(`\begin{table}[ht]`)
 	fmt.Printf(`\caption{Most versions per module that %s download}`, failMsg)
 	fmt.Println()
-	fmt.Println(`\label{table:versions}`)
+	fmt.Printf(`\label{%s}`, label)
+	fmt.Println()
 	fmt.Println(`\begin{tabular}{|l|r|}`)
 	fmt.Println(`\hline`)
 	for _, data := range most {
@@ -365,6 +403,18 @@ func (a accumulator) emitVersionTable(n int, fail bool) {
 	fmt.Println(`\end{tabular}`)
 	fmt.Println(`\end{table}`)
 
+}
+
+func statsTables() {
+	acc, fails := statsRun()
+
+	acc.emitBuildStats()
+	fmt.Println()
+	acc.emitTestStats()
+	fmt.Println()
+	acc.emitVersionTable(10, false)
+
+	fails.emitVersionTable(10, true)
 }
 
 func main() {
@@ -379,13 +429,5 @@ func main() {
 	pkgdata.SetStoragePath(dataDir)
 	pkgdata.LoadLatest()
 
-	acc, fails := statsRun()
-
-	acc.emitBuildStats()
-	fmt.Println()
-	acc.emitTestStats()
-	fmt.Println()
-	acc.emitVersionTable(10, false)
-
-	fails.emitVersionTable(10, true)
+	statsTables()
 }

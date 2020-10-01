@@ -119,9 +119,10 @@ def test_and_build(pkg, version):
             logging.debug("  Building go target %s", target['ImportPath'])
             buildable_targets += 1
             if go('build', target['ImportPath']):
-                pass
+                logging.debug("    Success building %s", target['ImportPath'])
             else:
                 all_builds_pass = False
+                logging.debug("    Build of %s failed", target['ImportPath'])
                 failed_builds.append(target['ImportPath'])
             if go('vet', target['ImportPath']):
                 vet_passed.append(target['ImportPath'])
