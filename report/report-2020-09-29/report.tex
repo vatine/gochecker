@@ -125,7 +125,7 @@ from the Go 1.14 round\footnote{What happened was that the complete test was
   ``let's do this with 1.15'' seemed like a good idea...}, so there
 may be cases where ``not the latest seed'' was used.
 
-Of the test failure numbers, the two that probably is most interesting
+Of the test failure numbers, the two that are probably most interesting
 to compare are the ``no test failures (with tests)'' (that is, at
 least one test target, and all tests pass), which is well over half
 (55.3\%, give or take) and the ``No build failures, but at least one
@@ -562,7 +562,7 @@ FAIL
 
 This test failure is (most probably) due to the {\tt go vet} checks
 that are now run as part of running the test suite. The v1.1.1 version
-was released before the 1.10 release of the Go tool-chain, when a
+was released before the 1.10 release of the Go toolchain, when a
 subset of vet checks became test failures. The test code has, since
 then, been fixed, but no new release seems to have been made.
 
