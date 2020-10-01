@@ -358,7 +358,8 @@ This module has six build targets, of which one fails (error message reformatted
 DEBUG:root:  Building go target github.com/Julusian/godocdown
 DEBUG:root:Running go build github.com/Julusian/godocdown
 /go/pkg/mod/github.com/!julusian/godocdown@v0.0.0-20170816220326-6d19f8ff2df8/godocdown.go:14:2:\
- import "github.com/robertkrimen/godocdown/godocdown" is a program, not an importable package
+     import "github.com/robertkrimen/godocdown/godocdown" is a program, \
+     not an importable package
 DEBUG:root:    Build of github.com/Julusian/godocdown failed
 \end{verbatim}
 
@@ -550,7 +551,8 @@ failures.
 \begin{verbatim}
 $ go test github.com/PuerkitoBio/purell       
 --- FAIL: TestEncodeNecessaryEscapesAll (0.00s)
-    purell_test.go:761: Got error parse "http://host/\x00\x01\x02\x03\x04\x05\x06\a\b\t\n\v\f\r\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f !\"": net/url: invalid control character in URL
+    purell_test.go:761: Got error parse "http://host/\x00\x01\x02\x03\x04\x05\x06\a\b\t\n\v\f\r\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f !\"":\
+         net/url: invalid control character in URL
 FAIL
 FAIL	github.com/PuerkitoBio/purell	0.006s
 FAIL
