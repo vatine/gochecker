@@ -19,12 +19,14 @@ type accumulator struct {
 	testSuccess              float64
 	noTestTargets            float64
 	allVetsPassed            float64
+	allFmtOK                 float64
 	buildTargets             []float64
 	buildFractions           []float64
 	testTargets              []float64
 	testFractions            []float64
 	vetFractions             []float64
 	buildTargetsFailed       []float64
+	buildTargetsFmtFailed    []float64
 	testTargetsFailed        []float64
 	vetTargetsFailed         []float64
 	failedBuildTargetsFailed []float64
@@ -93,6 +95,7 @@ func (a *accumulator) process(p pkgdata.PackageStats) {
 	testFraction := 1.0
 	failedBuildCount := float64(len(p.FailedBuilds))
 	failedTestCount := float64(len(p.FailedTests))
+	failedFmtCount := float64(len(p.FailedFmt))
 
 	if p.TestableTargets == 0 {
 		a.noTestTargets += 1.0
@@ -123,6 +126,7 @@ func (a *accumulator) process(p pkgdata.PackageStats) {
 
 	a.buildFractions = append(a.buildFractions, buildFraction)
 	a.buildTargetsFailed = append(a.buildTargetsFailed)
+	a.buildTargetsFmtFailed = append(a.buildTargetsFmtFailed, failedFmtCount)
 
 	a.testFractions = append(a.testFractions, testFraction)
 	a.testTargetsFailed = append(a.testTargetsFailed, float64(len(p.FailedTests)))
@@ -132,6 +136,9 @@ func (a *accumulator) process(p pkgdata.PackageStats) {
 	a.vetFractions = append(a.vetFractions, passedVetCount/(passedVetCount+failedVetCount))
 	if (passedVetCount > 0.0) && (failedVetCount) == 0 {
 		a.allVetsPassed += 1.0
+	}
+	if failedFmtCount == 0 {
+		a.allFmtOK += 1.0
 	}
 	a.vetTargetsFailed = append(a.vetTargetsFailed, float64(failedVetCount))
 }
@@ -259,6 +266,9 @@ func (a accumulator) emitBuildStats() {
 	fmt.Println()
 
 	fmt.Printf(`  No vet failures & %.0f (%f\%%) \\`, a.allVetsPassed, percent(a.seen, a.allVetsPassed))
+	fmt.Println()
+
+	fmt.Printf(`  No fmt failures & %.0f (%f\%%) \\`, a.allFmtOK, percent(a.seen, a.allFmtOK))
 	fmt.Println()
 
 	fmt.Printf(`  No test targets & %.0f (%f\%%) \\`, a.noTestTargets, percent(a.seen, a.noTestTargets))

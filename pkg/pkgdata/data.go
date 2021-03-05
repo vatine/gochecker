@@ -27,6 +27,7 @@ type PackageStats struct {
 	FailedBuilds      []string `json:"failedBuilds,omitempty"`
 	FailedTests       []string `json:"failedTests,omitempty"`
 	FailedVets        []string `json:"failedVets,omitempty"`
+	FailedFmt         []string `json:"failedFmt,omitempty"`
 }
 
 // A datatype suitable for iterating on the collected data
