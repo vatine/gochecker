@@ -22,6 +22,14 @@ def download(pkg, version):
     proc = subprocess.run(['go', 'get', pkg_and_version(pkg, version)], cwd='/go/testmod')
     return proc.returncode == 0
 
+def go_fmt(path):
+    """
+    Do a 'go fmt' check, retrun True if nothing needed changing, False if something did.
+    """
+    logging.debug("About to gofmt %s", path)
+    proc = subprocess.(['gofmt', '-d', path], stdout=subprocess.PIPE)
+    return len(proc.stdout) == 0
+
 
 def introspect(pkg):
     """
@@ -56,6 +64,20 @@ def go_escape(c):
     if c.isupper():
         return '!' + c.lower()
     return c
+
+
+def go_fmt_check(target):
+    """
+    Run gofmt on all the files in a build target. Return True, if all files are
+    OK, and False otherwise.
+    """
+    dir = target['Dir']
+    result = True
+    for name in target['GoFiles']:
+        result = result and go_fmt(os.path.join(dir, name))
+        if not result:
+            return False
+    return result
 
 
 def pkg_cwd(pkg, version):
@@ -113,9 +135,13 @@ def test_and_build(pkg, version):
     failed_tests = []
     vet_passed = []
     failed_vets = []
+    fmt_failed = []
 
     for target in all_targets:
         if len(target.get('GoFiles', [])):
+            logging.debug("  Checking gofmt %s", target['ImportPath'])
+            if not go_fmt_check(target):
+                fmt_failed.append(target)
             logging.debug("  Building go target %s", target['ImportPath'])
             buildable_targets += 1
             if go('build', target['ImportPath']):
@@ -146,6 +172,7 @@ def test_and_build(pkg, version):
     output['failedTests'] = failed_tests
     output['passedVets'] = vet_passed
     output['failedVets'] = failed_vets
+    output['failedFmt'] = fmt_failed
 
     return output
 
