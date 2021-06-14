@@ -84,13 +84,13 @@ func Save() error {
 
 	out, err := os.Create(target)
 	if err != nil {
-		return nil
+		return err
 	}
 	defer out.Close()
 
 	b, err := json.Marshal(packages)
 	if err != nil {
-		return nil
+		return err
 	}
 
 	_, err = out.Write(b)
@@ -100,7 +100,7 @@ func Save() error {
 	}
 	clean = true
 
-	return err
+	return nil
 }
 
 // Load package state from disk.
@@ -253,4 +253,38 @@ func AllPackages() chan Package {
 	}()
 
 	return rv
+}
+
+// Drop all "download failed" packages from the statistics, to allow
+// for a clean(er) "stop everything, restart" experience.
+// Returns the number of packages deleted.
+func PurgeDownloadFailed() int {
+	dataLock.Lock()
+	defer dataLock.Unlock()
+
+	clean = false
+
+	var toDelete []string
+
+	for key, val := range packages {
+		if !val.DownloadSucceeded {
+			toDelete = append(toDelete, key)
+		}
+	}
+
+	for _, key := range toDelete {
+		delete(packages, key)
+	}
+
+	return len(toDelete)
+}
+
+// Delete a specific package from the statistics
+func PurgePackage(name string) {
+	dataLock.Lock()
+	defer dataLock.Unlock()
+
+	clean = false
+
+	delete(packages, name)
 }
