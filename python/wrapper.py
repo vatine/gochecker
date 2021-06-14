@@ -3,23 +3,28 @@
 import json
 import logging
 import os
+import re
 import requests
 import subprocess
 import sys
 
 
-def download(pkg, version):
+BIN_IMPORT_RE = re.compile(
+    r'^/go/pkg/mod.*[.]go:[1-9][0-9]*:[0-9]+: .* is a program, not'
+    )
+VET_TYPE_RE = re.compile(
+    r'cannot use .* as type .* in argument'
+    )
+
+def unused_download(pkg, version):
     """
     Download a module.
     """
 
-    logging.debug("About to download %s @ %s", pkg, version)
-    proc = subprocess.run(['go', 'mod', 'download', pkg_and_version(pkg, version)],
-                          cwd='/go/testmod')
+    logging.debug("About to go get -tu %s@%s", pkg, version)
+    proc = subprocess.run(['go', 'get', '-tu', pkg_and_version(pkg, version)], cwd='/go/testmod')
     logging.debug("Status is %d", proc.returncode)
-    if proc.returncode == 0:
-        return true
-    proc = subprocess.run(['go', 'get', pkg_and_version(pkg, version)], cwd='/go/testmod')
+
     return proc.returncode == 0
 
 def go_fmt(path):
@@ -27,7 +32,7 @@ def go_fmt(path):
     Do a 'go fmt' check, retrun True if nothing needed changing, False if something did.
     """
     logging.debug("About to gofmt %s", path)
-    proc = subprocess.(['gofmt', '-d', path], stdout=subprocess.PIPE)
+    proc = subprocess.run(['gofmt', '-d', path], stdout=subprocess.PIPE)
     return len(proc.stdout) == 0
 
 
@@ -106,9 +111,21 @@ def download(pkg, version):
     logging.debug("  In %s", build_dir)
     subprocess.run(['go', 'mod', 'edit', '-require', pkg_designator], cwd=build_dir)
     logging.debug("  Downloading...")
-    proc = subprocess.run(['go', 'mod', 'download', pkg_designator], cwd=build_dir)
+    proc = subprocess.run(['go', 'get', '-t', '-u', pkg_designator], cwd=build_dir , stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
-    return proc.returncode == 0
+    out = proc.stdout.decode('utf-8')
+    logging.debug("  output is %s", out)
+    logging.debug("  exit status is %d", proc.returncode)
+    if proc.returncode == 0:
+        return True, True
+    else:
+        if "build constraints exclude all Go files" in out:
+            return True, False
+        if BIN_IMPORT_RE.search(out):
+            return True, False
+        if VET_TYPE_RE.search(out):
+            return True, False
+        return False, False
 
 
 def go(operation, pkg):
@@ -120,13 +137,13 @@ def go(operation, pkg):
 
 def test_and_build(pkg, version):
     output = {}
-
-    output['downloadSucceeded'] = download(pkg, version)
+    
+    output['downloadSucceeded'], cont = download(pkg, version)
     if not output['downloadSucceeded']:
         logging.info("Download failed, exiting early...")
         return output
 
-    all_targets = introspect(pkg)
+    all_targets = []
     buildable_targets = 0
     testable_targets = 0
     all_builds_pass = True
@@ -136,6 +153,11 @@ def test_and_build(pkg, version):
     vet_passed = []
     failed_vets = []
     fmt_failed = []
+    if not cont:
+        logging.info("Download succeeded, nothing to build.")
+        return output
+    all_targets = introspect(pkg)
+
 
     for target in all_targets:
         if len(target.get('GoFiles', [])):
