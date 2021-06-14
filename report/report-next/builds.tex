@@ -1,0 +1,58 @@
+\subsection{cloud.google.com/go/bigquery@v1.7.0}
+
+This is a simple build error, but interesting in that it shoudl be
+catchable with checks during code review. It could be that it is for
+``this is how the code WILL look'', or other code having changed since
+merge.
+
+\begin{verbatim}
+# cloud.google.com/go/bigquery/reservation/apiv1beta1
+/go/pkg/mod/cloud.google.com/go/bigquery@v1.7.0/reservation/apiv1beta1/reservation_client.go:728:111: req.GetBiReservation undefined (type *reservation.UpdateBiReservationRequest has no field or method GetBiReservation)
+    Build of cloud.google.com/go/bigquery/reservation/apiv1beta1 failed
+\end{verbatim}
+
+
+\subsection{cloud.google.com/go/pubsub@v1.0.0}
+
+This error is because the go.sum file for this specific version of the
+module genuinely does not contain any data for
+golang.org/x/time/rate. On the flip side, there is no go.mod file for
+golang.org/x/time/rate, but there is one for golang.org/x/time, so
+there's something a bit weird happening here.
+
+Not surprising, we are seeing two build targets failing on the same
+thing, both included for completeness sake.
+
+\begin{verbatim}
+DEBUG:root:  Building go target cloud.google.com/go/pubsub/loadtest
+DEBUG:root:Running go build cloud.google.com/go/pubsub/loadtest
+/go/pkg/mod/cloud.google.com/go/pubsub@v1.0.0/loadtest/loadtest.go:35:2: missing go.sum entry for module providing package golang.org/x/time/rate (imported by cloud.google.com/go/pubsub/loadtest); to add:
+	go get cloud.google.com/go/pubsub/loadtest@v1.0.0
+DEBUG:root:    Build of cloud.google.com/go/pubsub/loadtest failed
+DEBUG:root:Running go vet cloud.google.com/go/pubsub/loadtest
+/go/pkg/mod/cloud.google.com/go/pubsub@v1.0.0/loadtest/loadtest.go:35:2: missing go.sum entry for module providing package golang.org/x/time/rate (imported by cloud.google.com/go/pubsub/loadtest); to add:
+	go get cloud.google.com/go/pubsub/loadtest@v1.0.0
+...
+DEBUG:root:  Building go target cloud.google.com/go/pubsub/loadtest/cmd
+DEBUG:root:Running go build cloud.google.com/go/pubsub/loadtest/cmd
+/go/pkg/mod/cloud.google.com/go/pubsub@v1.0.0/loadtest/loadtest.go:35:2: missing go.sum entry for module providing package golang.org/x/time/rate (imported by cloud.google.com/go/pubsub/loadtest); to add:
+	go get cloud.google.com/go/pubsub/loadtest@v1.0.0
+DEBUG:root:    Build of cloud.google.com/go/pubsub/loadtest/cmd failed
+DEBUG:root:Running go vet cloud.google.com/go/pubsub/loadtest/cmd
+/go/pkg/mod/cloud.google.com/go/pubsub@v1.0.0/loadtest/loadtest.go:35:2: missing go.sum entry for module providing package golang.org/x/time/rate (imported by cloud.google.com/go/pubsub/loadtest); to add:
+	go get cloud.google.com/go/pubsub/loadtest@v1.0.0
+\end{verbatim}
+
+\subsection{github.com/DATA-DOG/go-sqlmock@v1.4.1}
+\begin{verbatim}
+Running go vet github.com/DATA-DOG/go-sqlmock/examples/orders
+/go/pkg/mod/github.com/!d!a!t!a-!d!o!g/go-sqlmock@v1.4.1/examples/orders/orders.go:8:2: no required module provides package github.com/kisielk/sqlstruct; to add it:
+	go get github.com/kisielk/sqlstruct
+
+\end{verbatim}
+
+This is due to a go.mod file that does NOT contain any of the
+dependencies. This release also does not have a go.sum file, meaning
+that repeatability in build is not guaranteed (actually, pretty much
+the opposite).
+

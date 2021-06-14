@@ -1,0 +1,210 @@
+\documentclass[a4paper]{paper}
+\usepackage[utf8]{inputenc}
+\usepackage{xcolor}
+\usepackage{graphicx} 
+
+\begin{document}
+\title{A third look at the health of the Go ecosystem}
+\author{Ingvar Mattsson}
+
+\maketitle
+
+\input{background}
+
+\input{methodology}
+
+\input{recommendations}
+
+\section{The numbers}
+
+Here are some numbers distilled from the investigation. For the
+breakdown on failing build/test cases, the mean has only been done for
+module/versions with at least one failure. The number of packages with
+download problems is over-reported, as it includes: packages with a
+name that differs from the requested in their go.mod, packages with a
+version number that doesn't parse, and packages that simply do not
+exist at this point in time.
+
+\input{numbers}
+
+\subsection{Download problems}
+
+The number of packages that failed to download has increased
+dramatically from the previous report, now standing at 1535, up from
+last report's 340. Some of this is due to redirection domain names no
+longer existing, some of this is down to more aggressive ``there are
+missing dependencies'' in the toolchain.
+
+Some of the download problems may stem from automatic ``try fetching a
+shortened module path''\footnote{an example would be starting with
+  ``golang.org/x/module@vx.y.z'', when that fails re-try with
+  ``golang.org/x@vx.y.z'', and finally ``golang.org@vx.y.z'', if you
+  start with an import that is in a deep-ish path within a module that
+  has a problem, this can cause multiple counts of download failures}.
+
+At this point, the clean-up is somewhat ad-hoc, addressing issues that
+have been manually spotted and (in a limited number of cases) extended
+to cover more incorrect import paths following the same pattern.
+
+\subsection{Building}
+
+Of the downloaded 4326 packages, 2604 (60.19\%) had no build
+failures. This is a dramatic drop from the previous report, where 4598
+out of 5108 (90.02\%) had no build failures.
+
+At the time of writing this, no exhaustive investigation to find common
+sources of these has been done.
+
+Like in previous reports, this time we see a very skewed distribution
+of build targets, with a few modules having may build targets
+massively skewing the distribution. The median number of build targets
+in a module is 2, the 75th percentile is 10, and the maximum number of
+build targets seen is 2674. These numbers are lower than in the last
+report, but MAY be influenced by multiple modules having downloaded
+but in such a way that no target introspection can succeed.
+
+\subsection{Go vet checks}
+
+The Go toolchain has a built-in tool for reporting on possible
+problems with the code that aren't wrong, per se, but have been found
+to be problematic. This is invokable as {\tt go vet {\it target}}
+and exits with a ``failure''\footnote{non-zero, in the case of unix}
+status if there was anything to report.
+
+This check has NOT been performed for packages that downloaded
+successfully, but had one or more missing dependedncies.
+
+\subsection{Go fmt checks}
+
+New for this report is checking downloaded packages for conformance to
+the {\tt go fmt} tool. This check has NOT been done for packages with
+one or more missing dependencies, so may be artificially inflated.
+
+
+\subsection{Tests}
+
+The Go toolchain has a built-in test framework (accessible by running
+{\tt go test {\it target}}) and it exits with a failure if any
+specific test for that target fails. This does not give us a ``number
+of failed tests'' (multiple failing tests within a single testable
+target will only be counted once), but does give us an indication of
+to what extent things are released (and used) with failing tests.
+
+This round of testing was done with the Go 1.16.3 release. It started
+with Go 1.16.0, then was re-done with 1.16.3 when there were what
+seemed like anomalies in the data. This turns out to be a combination
+of more aggressive ``nope, there are missing dependencies, so this
+download has now failed'' and a few other small things.
+
+
+Of the test failure numbers, the two that are probably most
+interesting to compare are the ``no test failures (with tests)'' (that
+is, at least one test target, and all tests pass), which distressingly
+has dropped dramatically from the previous report (now 39.6\%,
+previously 55.25\%) and the ``No build failures, but at least one
+failing test'' (15.49\%, down from 30.38\%). Now, there's no further
+breakdown than that, but we can at least assume that ``build failure''
+would at least potentially cause ``test failure'' and there's a decent
+margin between the two.
+
+Slighly discouraging, 17.29\% of the packages had no test targets at
+all, this is a combination both of ``a higher number of packages had
+no tests'' (728 in the last report, 748 in this report) and ``a larger
+proportion of modules failed to download''.
+
+\section{Investigation of (some) download errors}
+
+A module at a specific version is counted as ``has download error'' if
+both a {\tt go mod download ...} and a {\tt go get ...} fail. This is
+usually down to a discrepancy between the path of the module as
+requested, and the name in the go.mod file. Not all errors have been
+exhaustively investigated, but a few are investigated in more detail
+below.
+
+It is also counted as a ``download error'' if it is not possible to
+list the contents of the package, this is a rather generous definition
+of ``download error'', but from the background of ``go proxy for a
+walled garden, wanting some assurance of what comes in'', it makes
+some level of sense.
+
+The 192.168.1.2:3000 you will see in a few error messages is simply
+the Athens proxy that is part of the test environment.
+
+
+\include{downloads}
+
+\section{Investigation of (some) build errors}
+
+There are some packages that do not work to download with ``go mod
+download'', this seems to be down to structural problems with the
+repositories, like ``at higher than v1, but not under a v2 (or later)
+path prefix''. Observing that this is a possible source of ``fewer
+transitive dependencies'' as well as ``possibly false failed
+download'' numbers, the build environment has been changed to first
+try a ``go mod download'', and if that fails, a ``go get'' at the same
+version.
+
+Some packages fail because the path declared in their go.mod does not
+correspond to the path their dependencies have
+declared\footnote{Changing ``full name'' of a Go module is
+  problematic, as that effectively changes the ``unique identifier''}.
+
+In some cases, an erroneous version number has snuck in, causing
+problems downloading the package\footnote{This seems prevalent for
+  packages listing dependencies under k8s.io, for some reason}. One
+possibility may be that the go.mod file using local rewrites for
+dependencies. These work for the ``root'' package, but do not work
+during a transitive build. Another possibility is an automatic attempt
+to convert a godeps dependency file to a go.mod.
+
+\input{builds}
+
+\section{Investigation of (some) test errors}
+
+As a general comment, it is a bit surprising that tagged releases have
+test errors at all, indicating that there's improvements to make
+around release processes.
+
+In some cases, this is because the tooling
+has changed what constitutes a ``passing'' test (over time, some ``go
+vet'' warnings have become errors when they occur during a run of {\tt
+  go test}) and the CI pipeline is running with ``not the most recent
+release'', a situation that is totally understandable.
+
+There's also the case of a release
+that was made before the most current, which for obvious reasons will
+not have had a CI run against a version released after
+itself\footnote{But, if you can provide a CI system that will reliably
+  test against compiler versions released in the future from the time
+  the test is run, the author is interested in testing them...}
+
+For practical reasons, the testing has not been re-run with prior
+versions of the Go toolchain to find where things may have started
+acting up, even in the manual investigations that follow.
+
+We will now look closer at a few packages. I have explicitly excluded
+packages that have build failures from closer inspection, as the test
+may well be because of one (or more) build failures due to missing
+dependencies.
+
+The methodology for choosing packages is (approximately) looking
+through the emitted latest data file, in whatever order the JSON
+marshalling places things, investigate more closely what the test
+warnings are, until it is no longer fun to dig anymore.
+
+\input{tests}
+
+\section{Seed packages}
+
+This is the list of every seed package. During the initial data gathering, a
+problem with the build environment was noticed and the seed list
+would have contained all packages that failed to download due to a name
+change. Due to the desire to do the data gathering all over with Go 1.15, the ``go mod download failed, try go get instead'' fallback has been implemented.
+
+This time, no exhaustive manual ``try each of the 718 failed packages
+to see why'' has been done, leaving (potentially) interesting findings
+by the wayside.
+
+\input{seed}
+
+\end{document}

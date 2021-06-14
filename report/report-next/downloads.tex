@@ -1,0 +1,86 @@
+\subsection{cloud.google.com/go/bigquery@v1.0.0}
+
+This module/version combo fails with the following error:
+\begin{verbatim}
+go: downloading cloud.google.com/go/bigquery v1.0.0
+go: downloading cloud.google.com/go v0.44.1
+go: downloading cloud.google.com/go/bigquery v1.18.0
+go: downloading cloud.google.com/go v0.82.0
+cloud.google.com/go/bigquery: ambiguous import: found package cloud.google.com/go/bigquery in multiple modules:
+	cloud.google.com/go v0.44.1 (/go/pkg/mod/cloud.google.com/go@v0.44.1/bigquery)
+	cloud.google.com/go/bigquery v1.0.0 (/go/pkg/mod/cloud.google.com/go/bigquery@v1.0.0)
+\end{verbatim}
+
+This seems to be a new behaviour of the tool chain from 1.16 onwards.
+
+\subsection{cloud.google.com/go/pubsub@v1.0.1-beta.ordered.keys}
+
+This module/version fails with the following error:
+\begin{verbatim}
+go: downloading cloud.google.com/go/pubsub v1.0.1-beta.ordered.keys
+go get: cloud.google.com/go/pubsub@v1.0.1-beta.ordered.keys requires cloud.google.com/go/pubsub@v1.0.1, not cloud.google.com/go/pubsub@v1.0.1-beta.ordered.keys
+\end{verbatim}
+
+This seems to be some weird circular reference, that I have not investigated deeper.
+
+\section{cloud.google.com/go@v0.26.0}
+
+Another case of ``transitive dependencies failing to download'' that the existing tooling doesn't take into account.
+
+\begin{verbatim}
+go: downloading cloud.google.com/go v0.23.0
+go: downloading github.com/golang/protobuf v1.5.2
+go: downloading github.com/googleapis/gax-go v1.0.3
+go: downloading go.opencensus.io v0.23.0
+go: downloading golang.org/x/net v0.0.0-20210521195947-fe42d452be8f
+go: downloading golang.org/x/oauth2 v0.0.0-20210514164344-f6687ab2804c
+go: downloading golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
+go: downloading google.golang.org/api v0.47.0
+go: downloading google.golang.org/genproto v0.0.0-20210521181308-5ccab8a35a9a
+go: downloading google.golang.org/grpc v1.38.0
+go: downloading google.golang.org/api v0.0.0-20180910000450-7ca32eb868bf
+go: downloading github.com/googleapis/gax-go v1.0.0
+go: downloading google.golang.org/genproto v0.0.0-20180831171423-11092d34479b
+go: downloading google.golang.org/grpc v1.14.0
+go: downloading go.opencensus.io v0.18.0
+go: downloading google.golang.org/appengine v1.6.7
+go: downloading google.golang.org/protobuf v1.26.0
+go: downloading golang.org/x/sys v0.0.0-20210514084401-e8d321eab015
+go: downloading golang.org/x/sys v0.0.0-20210521203332-0cec03c779c1
+go: downloading golang.org/x/text v0.3.6
+go: downloading contrib.go.opencensus.io/exporter/stackdriver v0.13.6
+go: downloading contrib.go.opencensus.io/exporter/stackdriver v0.6.0
+cloud.google.com/go tested by
+	cloud.google.com/go.test imports
+	golang.org/x/oauth2/google: cannot find module providing package golang.org/x/oauth2/google
+cloud.google.com/go tested by
+	cloud.google.com/go.test imports
+	google.golang.org/api/option imports
+	golang.org/x/oauth2: cannot find module providing package golang.org/x/oauth2
+cloud.google.com/go tested by
+	cloud.google.com/go.test imports
+	cloud.google.com/go/datastore imports
+	google.golang.org/api/transport/grpc imports
+	google.golang.org/grpc/credentials/oauth imports
+	golang.org/x/oauth2/jwt: cannot find module providing package golang.org/x/oauth2/jwt
+\end{verbatim}
+
+
+\subsection{code.gitea.io/sdk@v0.14.0}
+
+This simply fails with a 404 error. Looking at the versions listed on
+pkg.go.dev, v0.14.0 is not displayed. The package is not
+module-enabled, but the documentation has a longer import path ({\tt
+  import "code.gitea.io/sdk/gitea"}) listed.
+
+This MAY be a case of a shortened URL, as there are also entries for
+the longer path.
+
+\subsection{contrib.go.opencensus.io/exporter/ocagent@v0.4.6}
+
+This is failing due to a non-existing dependency, but in a fashion that the existing toolchain doesn't recognise as such.
+
+\begin{verbatim}
+go: contrib.go.opencensus.io/exporter/ocagent@v0.4.6 requires
+	github.com/census-instrumentation/opencensus-proto@v0.1.0-0.20181214143942-ba49f56771b8: reading http://192.168.1.2:3000/github.com/census-instrumentation/opencensus-proto/@v/v0.1.0-0.20181214143942-ba49f56771b8.mod: 404 Not Found
+\end{verbatim}

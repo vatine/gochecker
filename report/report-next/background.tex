@@ -1,0 +1,21 @@
+\section{Background}
+
+The root inspiration for this investigation and report was trying to
+use Athens, with a validating web-hook, for a company concerned with
+what is brought in from external sources.
+
+In the initial setup, there were three intentional (and one
+non-intentional) way a package could fail validation. It could have
+file(s) that triggered a vulnerability scanner, it could fail to
+build, it could have failing unit tests. Or, unintended, either {\tt go
+mod download} or {\tt go list -json}\footnote{One possible reason for this is that the GitHub repo has been moved, causing a skew between the downloaded URL and that in the go.mod file} could fail.
+
+It soon became evident that ``has failing unit tests'' was not a
+feasible\footnote{Part of this is that over time, multiple ``go vet''
+  errors have been promoted test errors} criterion. It eventually
+became evident that ``has failing build targets'' was also not
+feasible.
+
+This raised a question in the author's mind. What is the current state
+of health of the Go eco-system? A previous investigation answered some of these questions, but it left sufficient scope for more questions to be asked (and refining the previous answers).
+

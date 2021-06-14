@@ -1,0 +1,56 @@
+\section{Recommendations based on this research}
+
+The conclusions in this section remain mostly unchanged from the first
+iteration of this line of investigation.
+
+\subsection{Modules}
+
+By all means make your code into a module, it improves the situation
+for any user of your code, and may also make your life easier
+(although in some cases it may make it harder).
+
+At least a few of the build errors seen can be directly traced to not
+having go modules enabled, so as a general recommendation, it is
+probably something that should be done.
+
+\subsection{Renaming}
+It is recommended to never rename a Go module. If you want it available
+under a new name, consider the new name a ``new module'' and leave
+releases up to the point in time where the changed version still
+available under the old name. If necessary, archive the repository, so
+that no further accidental modifications are possible. Probably after
+leaving a link in a README pointing to the new location.
+
+Otherwise, the renaming has suddenly broken previously-fine
+packages. If nothing else, the name change is putting a burden on any
+user of your library and should ideally be followed up with a pull
+request\footnote{The use of github.com as a platform is quite
+  prevalent, other version control systems have different names for
+  ``this is a unit of change''.} to bring users of the library back to
+a building state.
+
+Note that prior to the introduction of the module system, renames were
+(to some extent) transparent to code, which is probably why the
+practise continues even in a ``we should all be using modules now''
+world.
+
+The main reason I am recommending ``don't rename'' is that the name of
+a module is (part of) its unique identifier, and with that changing,
+on some level it is no longer ``the same module''. If nothing else, it
+now has another name.
+
+\subsection{Testing}
+
+It is recommended to have pull requests checked against all (or at
+least all relevant) test targets as part of the review
+process. Ideally, this should be done by automation, posting status
+back to the project.
+
+It is strongly recommended to not cut a release if there are any
+failing unit tests.
+
+It may also be useful having periodic (daily? weekly? monthly?) builds
+running with the latest toolchain, even if that's not the primary
+concern while developing. Sooner or later, your library will end up in
+a newer toolchain. And while the Go backwards compatibility guarantees
+are pretty good, this report shows that sometimes things change subtly.

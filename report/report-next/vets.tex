@@ -1,0 +1,17 @@
+\subsection{cloud.google.com/go/bigquery@v1.0.1}
+\begin{verbatim}
+# cloud.google.com/go/bigquery/datatransfer/apiv1 [cloud.google.com/go/bigquery/datatransfer/apiv1.test]
+/go/pkg/mod/cloud.google.com/go/bigquery@v1.0.1/datatransfer/apiv1/mock_test.go:428:3: unknown field 'DestinationDatasetId' in struct literal of type datatransfer.TransferConfig
+/go/pkg/mod/cloud.google.com/go/bigquery@v1.0.1/datatransfer/apiv1/mock_test.go:507:3: unknown field 'DestinationDatasetId' in struct literal of type datatransfer.TransferConfig
+/go/pkg/mod/cloud.google.com/go/bigquery@v1.0.1/datatransfer/apiv1/mock_test.go:638:3: unknown field 'DestinationDatasetId' in struct literal of type datatransfer.TransferConfig
+/go/pkg/mod/cloud.google.com/go/bigquery@v1.0.1/datatransfer/apiv1/mock_test.go:845:3: unknown field 'DestinationDatasetId' in struct literal of type datatransfer.TransferRun
+
+\end{verbatim}
+
+\subsection{contrib.go.opencensus.io/exporter/ocagent@v0.4.12}
+\begin{verbatim}
+# contrib.go.opencensus.io/exporter/ocagent [contrib.go.opencensus.io/exporter/ocagent.test]
+/go/pkg/mod/contrib.go.opencensus.io/exporter/ocagent@v0.4.12/viewdata_to_metrics_test.go:51:45: cannot use ma (type *metricsAgent) as type "github.com/census-instrumentation/opencensus-proto/gen-go/agent/metrics/v1".MetricsServiceServer in argument to "github.com/census-instrumentation/opencensus-proto/gen-go/agent/metrics/v1".RegisterMetricsServiceServer:
+	*metricsAgent does not implement "github.com/census-instrumentation/opencensus-proto/gen-go/agent/metrics/v1".MetricsServiceServer (missing "github.com/census-instrumentation/opencensus-proto/gen-go/agent/metrics/v1".mustEmbedUnimplementedMetricsServiceServer method)
+
+\end{verbatim}

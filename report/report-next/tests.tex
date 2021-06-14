@@ -1,0 +1,83 @@
+\subsection{cloud.google.com/go/bigquery@v1.0.1}
+\begin{verbatim}
+# cloud.google.com/go/bigquery/datatransfer/apiv1 [cloud.google.com/go/bigquery/datatransfer/apiv1.test]
+/go/pkg/mod/cloud.google.com/go/bigquery@v1.0.1/datatransfer/apiv1/mock_test.go:428:3: unknown field 'DestinationDatasetId' in struct literal of type datatransfer.TransferConfig
+/go/pkg/mod/cloud.google.com/go/bigquery@v1.0.1/datatransfer/apiv1/mock_test.go:507:3: unknown field 'DestinationDatasetId' in struct literal of type datatransfer.TransferConfig
+/go/pkg/mod/cloud.google.com/go/bigquery@v1.0.1/datatransfer/apiv1/mock_test.go:638:3: unknown field 'DestinationDatasetId' in struct literal of type datatransfer.TransferConfig
+/go/pkg/mod/cloud.google.com/go/bigquery@v1.0.1/datatransfer/apiv1/mock_test.go:845:3: unknown field 'DestinationDatasetId' in struct literal of type datatransfer.TransferRun
+FAIL	cloud.google.com/go/bigquery/datatransfer/apiv1 [build failed]
+FAIL
+\end{verbatim}
+
+This seems to be an outright mistake in the code. Looking at the
+datatransfer.TransferConfig type definition, I can't find any instance
+at which it has a member named that. The closest is that there's a
+{\tt Destination} struct member typed as a package-internal interface,
+with an exported type named {\tt TransferConfig_DestinationDatasetId}
+that, in turn, has a {\tt DestinationDatasetId} struct member.
+
+\subsection{contrib.go.opencensus.io/exporter/ocagent@v0.4.12}
+\begin{verbatim}
+# contrib.go.opencensus.io/exporter/ocagent [contrib.go.opencensus.io/exporter/ocagent.test]
+/go/pkg/mod/contrib.go.opencensus.io/exporter/ocagent@v0.4.12/viewdata_to_metrics_test.go:51:45: cannot use ma (type *metricsAgent) as type "github.com/census-instrumentation/opencensus-proto/gen-go/agent/metrics/v1".MetricsServiceServer in argument to "github.com/census-instrumentation/opencensus-proto/gen-go/agent/metrics/v1".RegisterMetricsServiceServer:
+	*metricsAgent does not implement "github.com/census-instrumentation/opencensus-proto/gen-go/agent/metrics/v1".MetricsServiceServer (missing "github.com/census-instrumentation/opencensus-proto/gen-go/agent/metrics/v1".mustEmbedUnimplementedMetricsServiceServer method)
+FAIL	contrib.go.opencensus.io/exporter/ocagent [build failed]
+FAIL
+\end{verbatim}
+
+\subsection{github.com/JamesClonk/vultr@v0.0.0-20210225162646-a13a15c46955}
+\begin{verbatim}
+# github.com/JamesClonk/vultr/lib
+/go/pkg/mod/github.com/!james!clonk/vultr@v0.0.0-20210225162646-a13a15c46955/lib/account_info_test.go:7:2: missing go.sum entry for module providing package github.com/stretchr/testify/assert (imported by github.com/JamesClonk/vultr/lib); to add:
+	go get -t github.com/JamesClonk/vultr/lib@v0.0.0-20210225162646-a13a15c46955
+FAIL	github.com/JamesClonk/vultr/lib [setup failed]
+FAIL
+
+\end{verbatim}
+
+I am not at all sure why we're seeing this error message. At the 1.3.0
+version, there is a go.mod for {\tt github.com/stretchr/testify}, and
+there is none for the {\tt assert} subdirectory.
+
+\subsection{github.com/Rican7/retry@v0.1.0}
+\begin{verbatim}
+# github.com/Rican7/retry
+vet: /go/pkg/mod/github.com/!rican7/retry@v0.1.0/retry_test.go:143:6: logFile declared but not used
+FAIL	github.com/Rican7/retry [build failed]
+FAIL
+\end{verbatim}
+
+This is a pretty classic Go error message. There is an unused
+variable, which (for good or bad) is a compile error.
+
+In this specific case, it is in an example, but it looks like the test
+file has actual tests in addition to the examples.
+
+\subsection{github.com/aokoli/goutils@v1.0.1}
+\begin{verbatim}
+# github.com/aokoli/goutils
+/go/pkg/mod/github.com/aokoli/goutils@v1.0.1/randomstringutils.go:118:44: conversion from int to string yields a string of one rune, not a string of digits (did you mean fmt.Sprint(x)?)
+FAIL	github.com/aokoli/goutils [build failed]
+FAIL
+\end{verbatim}
+
+This is one of those Go vet checks that have been promoted to ``flag
+as a failure during tests''. There are a few more of those and as a
+general rule, some code from ``before this was enabled'' may still
+have it.
+
+\subsection{github.com/appc/spec@v0.8.11}
+\begin{verbatim}
+/go/pkg/mod/github.com/appc/spec@v0.8.11/schema/types/semver.go:20:2: no required module provides package github.com/coreos/go-semver/semver; to add it:
+	go get github.com/coreos/go-semver/semver
+/go/pkg/mod/github.com/appc/spec@v0.8.11/schema/types/resource/quantity.go:28:2: no required module provides package github.com/spf13/pflag; to add it:
+	go get github.com/spf13/pflag
+/go/pkg/mod/github.com/appc/spec@v0.8.11/schema/image.go:25:2: no required module provides package go4.org/errorutil; to add it:
+	go get go4.org/errorutil
+/go/pkg/mod/github.com/appc/spec@v0.8.11/schema/types/resource/amount.go:23:2: no required module provides package gopkg.in/inf.v0; to add it:
+	go get gopkg.in/inf.v0
+\end{verbatim}
+
+
+This is a pre-module package, failing to build in many ways. This
+seems to be the root of the test failure in this case.
