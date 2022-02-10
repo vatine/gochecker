@@ -32,8 +32,6 @@ func startRunLoop() chan execBlob {
 	go runLoop(c)
 	go runLoop(c)
 	go runLoop(c)
-	go runLoop(c)
-	go runLoop(c)
 
 	return c
 }
